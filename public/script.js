@@ -94,35 +94,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- THE CORRECTED FETCH FUNCTION ---
-    async function generateAiResponse(userPrompt) {
-        try {
-            // Use a relative path for the single-server setup.
-            const response = await fetch('https://codeweaver-ai-app.onrender.com/api/generate-code', {
-                // Explicitly use the POST method.
-                method: 'POST', 
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ prompt: userPrompt }),
-            });
+    // In public/script.js
 
-            // Improved error handling.
-            if (!response.ok) {
-                const errorText = await response.text(); 
-                throw new Error(`Server responded with status: ${response.status}. Body: ${errorText}`);
-            }
+// --- Corrected fetch function for a TWO-SERVICE deployment ---
+async function generateAiResponse(userPrompt) {
+  try {
+    // This MUST be the full URL of your back-end Web Service.
+    const response = await fetch('https://codeweaver-ai-app.onrender.com/api/generate-code', {
+      method: 'POST', 
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prompt: userPrompt }),
+    });
 
-            const data = await response.json();
-            return data;
-
-        } catch (error) {
-            console.error('Error fetching from AI server:', error);
-            return {
-                message: `An error occurred. Please check the browser console for details. Error: ${error.message}`,
-                code: null,
-            };
-        }
+    if (!response.ok) {
+      const errorText = await response.text(); 
+      throw new Error(`Server responded with status: ${response.status}. Body: ${errorText}`);
     }
+
+    const data = await response.json();
+    return data;
+
+  } catch (error) {
+    console.error('Error fetching from AI server:', error);
+    return {
+      message: `An error occurred. Please check the browser console. Error: ${error.message}`,
+      code: null,
+    };
+  }
+}
 
     function displayUserMessage(text) {
         const messageEl = document.createElement('div');

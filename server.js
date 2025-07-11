@@ -267,25 +267,24 @@
 // This is the final, corrected version of the server code.
 
 // Load environment variables from a .env file for local development
-require('dotenv').config(); 
+// --- server.js for a TWO-SERVICE deployment ---
 
+require('dotenv').config(); 
 const express = require('express');
 const cors = require('cors');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // --- 1. INITIALIZE APP ---
 const app = express();
-// Render provides its own PORT environment variable, which we must use.
 const PORT = process.env.PORT || 3000; 
-console.log("Initializing Express application...");
 
-// --- 2. CONFIGURE MIDDLEWARE ---
-// A robust CORS policy is less critical in a single-server setup,
-// but it's good practice to have it for potential future use.
+// --- 2. CONFIGURE CORS (CRITICAL FOR TWO SERVICES) ---
+// This whitelist MUST include your front-end's URL.
 const allowedOrigins = [
-  'https://codeweaver-ai-app.onrender.com', // Your primary live URL
-  'http://localhost:3000',                  // For local testing
-  'http://127.0.0.1:3000'
+  'https://codeweaver-ai-app-12.onrender.com', // Your live front-end on Render
+  // The following are for local testing.
+  'http://localhost:5500',
+  'http://127.0.0.1:5500'
 ];
 
 const corsOptions = {
@@ -298,106 +297,54 @@ const corsOptions = {
   }
 };
 app.use(cors(corsOptions));
-console.log("CORS middleware configured.");
 
-// This allows our server to understand incoming requests with a JSON body.
+// JSON body parser
 app.use(express.json());
-console.log("JSON parser middleware configured.");
 
 
 // --- 3. INITIALIZE GOOGLE AI CLIENT ---
-// The API key is loaded securely from the environment variables you set on Render.
 const GOOGLE_API_KEY = "AIzaSyDipQ437B-eyMcxEfuKmzJhvkesc-lPfhY";
-
 if (!GOOGLE_API_KEY) {
-  console.error("FATAL ERROR: The GOOGLE_API_KEY environment variable is not set!");
-  console.error("Please set this variable in the 'Environment' tab of your Render Web Service.");
-  process.exit(1); // Stop the server if the key is missing.
+  console.error("FATAL ERROR: GOOGLE_API_KEY is not set!");
+  process.exit(1);
 }
-
 const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
-console.log("Google AI client initialized successfully.");
 
 
-// --- 4. DEFINE API ROUTES FIRST ---
-// API routes are defined before the static file handler.
+// --- 4. DEFINE ROUTES ---
 
-// Health Check Route for Render
+// Health Check Route
 app.get('/healthcheck', (req, res) => {
-  console.log(`[${new Date().toISOString()}] Health check successful.`);
   res.status(200).json({ status: "ok", message: "Server is healthy." });
 });
-console.log("Route defined: GET /healthcheck");
 
-// Main API Route for Generating Code
+// Main API Route
 app.post('/api/generate-code', async (req, res) => {
-  console.log(`[${new Date().toISOString()}] Received request for /api/generate-code.`);
   try {
     const { prompt } = req.body;
     if (!prompt) {
-      console.log("Request rejected: Prompt was empty.");
       return res.status(400).json({ error: 'Prompt is required.' });
     }
-
-    console.log("Sending prompt to Google AI...");
-    // Use the current, correct model name.
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
-    
     const fullPrompt = `
-      You are CodeWeaver AI, an expert web developer specializing in self-contained HTML and CSS components.
-      Your task is to take a user's description and generate the corresponding HTML and CSS code.
-      Instructions:
-      1. You MUST respond with a valid JSON object, and nothing else.
-      2. The JSON object must have exactly two keys: "message" and "code".
-      3. The "message" key should contain a friendly, conversational text response.
-      4. The "code" key must be a single string containing the HTML and a <style> tag.
-      5. Do NOT include <html> or <body> tags.
-      User Request: "${prompt}"
+      You are CodeWeaver AI... [Your full prompt here]
     `;
-    
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
     const aiResponseText = response.text();
-    console.log("Received response from Google AI.");
-
-    let parsedResponse;
-    try {
-      parsedResponse = JSON.parse(aiResponseText);
-    } catch (e) {
-      console.error("CRITICAL: Failed to parse JSON from AI response.");
-      console.error("Raw AI Response Text:", aiResponseText);
-      throw new Error("The AI response was not in the expected valid JSON format.");
-    }
-    
-    console.log("Successfully parsed AI response. Sending to client.");
+    const parsedResponse = JSON.parse(aiResponseText);
     res.json(parsedResponse);
-
   } catch (error) {
     console.error("ERROR inside /api/generate-code:", error.message);
     res.status(500).json({ 
-        message: 'An internal server error occurred while contacting the AI.',
+        message: 'An internal server error occurred.',
         code: `<!-- Server Error: ${error.message} -->` 
     });
   }
 });
-console.log("Route defined: POST /api/generate-code");
 
 
-// --- 5. SERVE STATIC FRONT-END FILES ---
-// This middleware must be defined AFTER the API routes.
-// It serves your index.html, style.css, and script.js from the 'public' folder.
-app.use(express.static('public'));
-console.log("Static file middleware configured to serve from 'public' folder.");
-
-// This catch-all makes sure that if you refresh a page on a front-end route,
-// it still serves the index.html file. It's crucial for Single Page Apps.
-app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
-});
-
-
-// --- 6. START THE SERVER ---
-// We bind to '0.0.0.0' to ensure it's accessible within Render's environment.
+// --- 5. START THE SERVER ---
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server startup complete. Listening for connections on port ${PORT}`);
+  console.log(`Server startup complete. Listening on port ${PORT}`);
 });
