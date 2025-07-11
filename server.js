@@ -303,7 +303,7 @@ app.use(express.json());
 
 
 // --- 3. INITIALIZE GOOGLE AI CLIENT ---
-const GOOGLE_API_KEY = "AIzaSyDipQ437B-eyMcxEfuKmzJhvkesc-lPfhY";
+const GOOGLE_API_KEY = "AIzaSyDEkUGfR1Vl6CDemeMMfcjKcZnt870JyWE";
 if (!GOOGLE_API_KEY) {
   console.error("FATAL ERROR: GOOGLE_API_KEY is not set!");
   process.exit(1);
