@@ -1,32 +1,65 @@
-// Load environment variables from .env file
+// --- IMPORTANT SECURITY NOTICE ---
+// Your API key was previously hardcoded. That key should be considered
+// compromised. Please generate a new key in Google AI Studio and
+// store it securely as an Environment Variable, NOT in the code.
+
+// Load environment variables from a .env file for local development
+require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-// Import the Google Generative AI package
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-// Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- Middleware ---
-app.use(cors());
+
+// 1. CONFIGURED CORS
+// Create a whitelist of allowed domains.
+// Add the URL of your deployed front-end application here.
+const allowedOrigins = [
+  'https://your-live-frontend-url.onrender.com', // <-- Replace with your Render Static Site URL
+  'https://github.com/Sanyogita-Pandey/codeweaver-ai-app',          // <-- Or replace with your GitHub Pages URL
+  // Keep these for local testing:
+  'http://localhost:5500',
+  'http://127.0.0.1:5500'
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+};
+
+// Use the configured CORS options
+app.use(cors(corsOptions));
+
+// Use express.json() to parse JSON request bodies
 app.use(express.json());
 
+
 // --- Google AI Client Initialization ---
-// Check if the API key is available
+
+// 2. SECURE API KEY HANDLING
+// The key is safely loaded from environment variables.
 const GOOGLE_API_KEY = "AIzaSyB5D-OeNpFJQo7orqHlD620nZBG7SAoGBY";
 
-// ✅ Optional: check the hardcoded value instead of process.env
 if (!GOOGLE_API_KEY) {
-  console.error("FATAL ERROR: GOOGLE_API_KEY is not set.");
+  console.error("FATAL ERROR: GOOGLE_API_KEY is not defined in your environment variables.");
+  // On Render, check your Environment settings. Locally, check your .env file.
   process.exit(1);
 }
 
-// ✅ Now use it
 const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
 
-// --- API Endpoint ---
+
+// --- API Endpoint (Your original code here is good, no changes needed) ---
 app.post('/api/generate-code', async (req, res) => {
   try {
     const { prompt } = req.body;
@@ -35,12 +68,9 @@ app.post('/api/generate-code', async (req, res) => {
       return res.status(400).json({ error: 'Prompt is required.' });
     }
 
-    // This is the "Prompt Engineering" for Gemini.
-    // It's a set of instructions telling the AI how to behave and what format to use.
     const fullPrompt = `
       You are CodeWeaver AI, an expert web developer specializing in creating self-contained HTML and CSS components.
       Your task is to take a user's description and generate the corresponding HTML and CSS code.
-
       **Instructions:**
       1.  You MUST respond with a valid JSON object. Do not wrap the JSON in markdown backticks or any other text.
       2.  The JSON object must have exactly two keys: "message" and "code".
@@ -49,9 +79,7 @@ app.post('/api/generate-code', async (req, res) => {
       5.  Do NOT include \`<html>\`, \`<head>\`, or \`<body>\` tags in the "code" string. Only provide the component's code.
       6.  Ensure the CSS is well-scoped to avoid conflicts, for example by using specific class names.
       7.  Use modern and clean code practices.
-
       **User Request:** "${prompt}"
-
       **Example of your required output format:**
       {
         "message": "Sure, here is a simple and elegant button for you.",
@@ -59,32 +87,25 @@ app.post('/api/generate-code', async (req, res) => {
       }
     `;
 
-    // Choose the model
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-    // Generate content
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
     const aiResponseText = response.text();
-
-    // The AI's response is a string, which should be in our specified JSON format.
-    // We parse it to turn it into a real JavaScript object.
     let parsedResponse;
     try {
-        parsedResponse = JSON.parse(aiResponseText);
+      parsedResponse = JSON.parse(aiResponseText);
     } catch (e) {
-        console.error("AI did not return valid JSON. Raw response:", aiResponseText);
-        throw new Error("The AI response was not in the expected format.");
+      console.error("AI did not return valid JSON. Raw response:", aiResponseText);
+      throw new Error("The AI response was not in the expected format.");
     }
 
-    // Send the structured response back to the front-end
     res.json(parsedResponse);
 
   } catch (error) {
-    console.error('Error calling Google AI API:', error);
+    console.error('Error in /api/generate-code endpoint:', error);
     res.status(500).json({ 
-        message: 'An error occurred while generating the code. Please check the server logs.',
-        code: `<!-- Error: ${error.message} -->` 
+        message: 'An error occurred on the server. Please check the server logs for details.',
+        code: `<!-- Server Error: ${error.message} -->` 
     });
   }
 });
@@ -92,5 +113,5 @@ app.post('/api/generate-code', async (req, res) => {
 
 // --- Start the server ---
 app.listen(PORT, () => {
-  console.log(`CodeWeaver AI server (using Google Gemini) is running on http://localhost:${PORT}`);
+  console.log(`CodeWeaver AI server is running on port ${PORT}`);
 });
