@@ -299,7 +299,7 @@ ${bodyContent}
 // This function now calls our Node.js backend to get a real AI response.
 async function generateAiResponse(userPrompt) {
   try {
-    const response = await fetch('http://localhost:3000/api/generate-code', {
+    const response = await fetch('https://codeweaver-server.onrender.com/api/generate-code', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
