@@ -21,7 +21,7 @@ const allowedOrigins = [
   'https://codeweaver-ai-app-12.onrender.com', // <-- Replace with your Render Static Site URL
   'https://github.com/Sanyogita-Pandey/codeweaver-ai-app',          // <-- Or replace with your GitHub Pages URL
   // Keep these for local testing:
-  'http://localhost:5500',
+  'http://localhost:3000',
   'http://127.0.0.1:5500'
 ];
 
@@ -120,6 +120,6 @@ app.post('/api/generate-code', async (req, res) => {
 
 
 // --- Start the server ---
-app.listen(PORT, () => {
+app.listen(PORT,'0.0.0.0', () => {
   console.log(`CodeWeaver AI server is running on port ${PORT}`);
 });
