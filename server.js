@@ -15,7 +15,7 @@ console.log("App initialized.");
 // --- 2. SETUP MIDDLEWARE ---
 // A robust CORS setup is crucial for production.
 const allowedOrigins = [
- 'Access-Control-Allow-Origin: https://codeweaver-ai-app-12.onrender.com', // Your live front-end
+ ' https://codeweaver-ai-app-12.onrender.com', // Your live front-end
   'http://localhost:5500',                    // For local testing
   'http://127.0.0.1:5500'                     // For local testing
 ];
