@@ -211,7 +211,7 @@ app.post('/api/generate-code', async (req, res) => {
     }
 
     console.log("Sending prompt to Google AI...");
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
     
     // [Your AI Prompt - this part is up to you]
     const fullPrompt = `
