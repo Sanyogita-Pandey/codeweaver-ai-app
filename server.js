@@ -325,7 +325,7 @@ app.post('/api/generate-code', async (req, res) => {
     if (!prompt) {
       return res.status(400).json({ error: 'Prompt is required.' });
     }
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-latest" });
     const fullPrompt = `
       You are CodeWeaver AI... [Your full prompt here]
     `;
