@@ -297,31 +297,41 @@ ${bodyContent}
 // });
 // --- NEW SERVER-BASED AI LOGIC ---
 // This function now calls our Node.js backend to get a real AI response.
+// In public/script.js
+
+// --- THIS IS THE CORRECTED AND IMPROVED FUNCTION ---
 async function generateAiResponse(userPrompt) {
   try {
-    // https://codeweaver-server.onrender.com/api/generate-code
-    const response = await fetch('https://codeweaver-ai-app.onrender.com/api/generate-code.', {
-      method: 'POST',
+    const response = await fetch('https://codeweaver-ai-app.onrender.com/api/generate-code', {
+      // --- THE FIX IS HERE ---
+      // We are explicitly telling the browser to send a POST request.
+      method: 'POST', 
+      // ----------------------
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ prompt: userPrompt }),
     });
 
+    // Improved error handling to give you clearer messages in the future.
     if (!response.ok) {
-      // Handle server errors (e.g., 500 internal server error)
-      const errorData = await response.json();
-      throw new Error(errorData.error || `Server responded with status: ${response.status}`);
+      // If the server sends a 404 or 500 error, this block will run.
+      // We use .text() because the error response might be HTML, not JSON.
+      const errorText = await response.text(); 
+      throw new Error(`Server responded with status: ${response.status}. Body: ${errorText}`);
     }
 
+    // If we get here, the response was successful (e.g., status 200).
+    // Now it's safe to parse it as JSON.
     const data = await response.json();
-    return data; // This will return an object like { message: "...", code: "..." }
+    return data;
 
   } catch (error) {
+    // This will catch both network errors (like "Failed to fetch")
+    // and the server errors we threw above.
     console.error('Error fetching from AI server:', error);
-    // Return a user-friendly error message to be displayed in the chat
     return {
-      message: `I'm having trouble connecting to my brain right now. Please make sure the server is running and try again. Error: ${error.message}`,
+      message: `I'm having trouble connecting to my brain right now. Please check the server logs. Error: ${error.message}`,
       code: null,
     };
   }
