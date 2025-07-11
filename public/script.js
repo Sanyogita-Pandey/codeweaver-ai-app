@@ -300,7 +300,7 @@ ${bodyContent}
 async function generateAiResponse(userPrompt) {
   try {
     // https://codeweaver-server.onrender.com/api/generate-code
-    const response = await fetch('https://codeweaver-ai-app.onrender.com/api/generate-code', {
+    const response = await fetch('https://codeweaver-ai-app.onrender.com/api/generate-code.', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
