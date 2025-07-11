@@ -4,7 +4,6 @@
 // store it securely as an Environment Variable, NOT in the code.
 
 // Load environment variables from a .env file for local development
-require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
@@ -19,7 +18,7 @@ const PORT = process.env.PORT || 3000;
 // Create a whitelist of allowed domains.
 // Add the URL of your deployed front-end application here.
 const allowedOrigins = [
-  'https://your-live-frontend-url.onrender.com', // <-- Replace with your Render Static Site URL
+  'https://codeweaver-ai-app-12.onrender.com', // <-- Replace with your Render Static Site URL
   'https://github.com/Sanyogita-Pandey/codeweaver-ai-app',          // <-- Or replace with your GitHub Pages URL
   // Keep these for local testing:
   'http://localhost:5500',
@@ -58,6 +57,15 @@ if (!GOOGLE_API_KEY) {
 
 const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
 
+// --- Health Check Endpoint (for debugging) ---
+app.get('/healthcheck', (req, res) => {
+  console.log("Health check endpoint was hit!");
+  res.status(200).json({
+    status: "ok",
+    message: "Server is alive and responding.",
+    timestamp: new Date().toISOString()
+  });
+});
 
 // --- API Endpoint (Your original code here is good, no changes needed) ---
 app.post('/api/generate-code', async (req, res) => {
