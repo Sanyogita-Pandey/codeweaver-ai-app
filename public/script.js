@@ -23,11 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let fullHtmlContent = createHtmlBoilerplate('');
 
     // --- Event Listeners ---
-
-    // Login/Guest Logic
     loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        // In a real app, you'd have auth logic here
         alert('Login functionality is for demonstration. Welcome!');
         showWorkspace();
     });
@@ -36,15 +33,14 @@ document.addEventListener('DOMContentLoaded', () => {
         showWorkspace();
     });
 
-    // Chat Logic
     sendBtn.addEventListener('click', handleUserMessage);
     chatInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
             handleUserMessage();
         }
     });
 
-    // Magic Wand Suggestions
     magicWandBtn.addEventListener('click', () => {
         suggestions.classList.toggle('hidden');
     });
@@ -57,7 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Editor/Preview Logic
     copyBtn.addEventListener('click', copyCode);
     downloadBtn.addEventListener('click', downloadCode);
 
@@ -69,14 +64,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Functions ---
-
     function showWorkspace() {
         loginPage.classList.add('hidden');
         appWorkspace.classList.remove('hidden');
-        updatePreview(fullHtmlContent); // Initial empty preview
+        updatePreview(fullHtmlContent);
     }
 
-    function handleUserMessage() {
+    async function handleUserMessage() {
         const messageText = chatInput.value.trim();
         if (!messageText) return;
 
@@ -85,21 +79,49 @@ document.addEventListener('DOMContentLoaded', () => {
         
         showTypingIndicator();
 
-        // Simulate AI response
-        setTimeout(() => {
-            const aiResponse = generateAiResponse(messageText);
-            removeTypingIndicator();
-            displayAiMessage(aiResponse.message);
+        const aiResponse = await generateAiResponse(messageText);
+        
+        removeTypingIndicator();
+        displayAiMessage(aiResponse.message);
+        
+        if (aiResponse.code) {
+            const bodyEnd = fullHtmlContent.lastIndexOf('</body>');
+            fullHtmlContent = fullHtmlContent.substring(0, bodyEnd) + aiResponse.code + '\n</body>\n</html>';
             
-            if (aiResponse.code) {
-                // We'll append the new code to the body of our existing HTML
-                const bodyEnd = fullHtmlContent.lastIndexOf('</body>');
-                fullHtmlContent = fullHtmlContent.substring(0, bodyEnd) + aiResponse.code + '\n</body>\n</html>';
-                
-                codeEditor.value = fullHtmlContent;
-                updatePreview(fullHtmlContent);
+            codeEditor.value = formatHtml(fullHtmlContent);
+            updatePreview(fullHtmlContent);
+        }
+    }
+
+    // --- THE CORRECTED FETCH FUNCTION ---
+    async function generateAiResponse(userPrompt) {
+        try {
+            // Use a relative path for the single-server setup.
+            const response = await fetch('https://codeweaver-ai-app.onrender.com/api/generate-code', {
+                // Explicitly use the POST method.
+                method: 'POST', 
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt: userPrompt }),
+            });
+
+            // Improved error handling.
+            if (!response.ok) {
+                const errorText = await response.text(); 
+                throw new Error(`Server responded with status: ${response.status}. Body: ${errorText}`);
             }
-        }, 1500);
+
+            const data = await response.json();
+            return data;
+
+        } catch (error) {
+            console.error('Error fetching from AI server:', error);
+            return {
+                message: `An error occurred. Please check the browser console for details. Error: ${error.message}`,
+                code: null,
+            };
+        }
     }
 
     function displayUserMessage(text) {
@@ -118,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         messageEl.className = 'message ai-message';
         messageEl.innerHTML = `
             <i class="fa-solid fa-robot icon"></i>
-            <div class="text">${text}</div>
+            <div class="text">${text || "I'm sorry, I couldn't generate a response. Please check the console for errors."}</div>
         `;
         chatMessages.appendChild(messageEl);
         scrollToBottom();
@@ -181,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (appWorkspace.classList.contains(className)) {
             appWorkspace.classList.remove(className);
         } else {
-            appWorkspace.classList.remove('chat-fullscreen', 'editor-fullscreen'); // Remove any existing
+            appWorkspace.classList.remove('chat-fullscreen', 'editor-fullscreen');
             appWorkspace.classList.add(className);
         }
     }
@@ -194,9 +216,8 @@ document.addEventListener('DOMContentLoaded', () => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generated Website</title>
     <style>
-        body { font-family: sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; }
-        .container { max-width: 1200px; margin: auto; }
-        /* AI will add more specific styles here */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; margin: 0; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
     </style>
 </head>
 <body>
@@ -205,162 +226,22 @@ ${bodyContent}
 </html>`;
     }
 
-//     --- MOCK AI LOGIC ---
-//     In a real application, this would be an API call to a service like GPT-4.
-//     function generateAiResponse(prompt) {
-//         const lowerPrompt = prompt.toLowerCase();
+    // A simple function to make the HTML in the editor more readable
+    function formatHtml(html) {
+        const tab = '  ';
+        let result = '';
+        let indent = '';
 
-//         if (lowerPrompt.includes('nav') || lowerPrompt.includes('navigation')) {
-//             return {
-//                 message: "Sure, here's a modern navigation bar. I've added it to your website.",
-//                 code: `
-// <style>
-//     .navbar { background-color: #333; overflow: hidden; }
-//     .navbar a { float: left; display: block; color: white; text-align: center; padding: 14px 20px; text-decoration: none; }
-//     .navbar a:hover { background-color: #ddd; color: black; }
-//     .navbar .logo { font-weight: bold; }
-// </style>
-// <div class="navbar">
-//     <a href="#" class="logo">MyLogo</a>
-//     <a href="#">Home</a>
-//     <a href="#">About</a>
-//     <a href="#">Services</a>
-//     <a href="#">Contact</a>
-// </div>`
-//             };
-//         }
+        html.split(/>\s*</).forEach(function(element) {
+            if (element.match( /^\/\w/ )) {
+                indent = indent.substring(tab.length);
+            }
+            result += indent + '<' + element + '>\r\n';
+            if (element.match( /^<?\w[^>]*[^\/]$/ ) && !element.startsWith("input") && !element.startsWith("meta") && !element.startsWith("link")) { 
+                indent += tab;
+            }
+        });
 
-//         if (lowerPrompt.includes('hero')) {
-//             return {
-//                 message: "Excellent choice! A hero section has been created and added below the existing content.",
-//                 code: `
-// <style>
-//     .hero { background-color: #1a1a2e; color: white; padding: 100px 20px; text-align: center; }
-//     .hero h1 { font-size: 3.5rem; margin-bottom: 10px; }
-//     .hero p { font-size: 1.2rem; margin-bottom: 30px; }
-//     .hero .cta-button { background-color: #e94560; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; }
-// </style>
-// <div class="hero">
-//     <div class="container">
-//         <h1>Welcome to Your Website</h1>
-//         <p>This is a hero section generated by CodeWeaver AI.</p>
-//         <a href="#" class="cta-button">Get Started</a>
-//     </div>
-// </div>`
-//             };
-//         }
-
-//         if (lowerPrompt.includes('card')) {
-//             return {
-//                 message: "Here are three responsive cards. I've included placeholders for images and text.",
-//                 code: `
-// <style>
-//     .card-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 40px 0; }
-//     .card { background: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow: hidden; width: 300px; text-align: left;}
-//     .card img { width: 100%; height: 180px; object-fit: cover; }
-//     .card-content { padding: 20px; }
-//     .card h3 { margin-top: 0; }
-// </style>
-// <div class="container">
-//     <div class="card-container">
-//         <div class="card">
-//             <img src="https://via.placeholder.com/300x180.png/1a1a2e/ffffff?text=Feature+1" alt="Placeholder Image">
-//             <div class="card-content">
-//                 <h3>Feature One</h3>
-//                 <p>A brief description of this amazing feature.</p>
-//             </div>
-//         </div>
-//         <div class="card">
-//             <img src="https://via.placeholder.com/300x180.png/e94560/ffffff?text=Feature+2" alt="Placeholder Image">
-//             <div class="card-content">
-//                 <h3>Feature Two</h3>
-//                 <p>A brief description of this amazing feature.</p>
-//             </div>
-//         </div>
-//         <div class="card">
-//             <img src="https://via.placeholder.com/300x180.png/16213e/ffffff?text=Feature+3" alt="Placeholder Image">
-//             <div class="card-content">
-//                 <h3>Feature Three</h3>
-//                 <p>A brief description of this amazing feature.</p>
-//             </div>
-//         </div>
-//     </div>
-// </div>`
-//             };
-//         }
-        
-//         return {
-//             message: "I'm not sure how to build that yet. Try asking for a 'navigation bar', a 'hero section', or a 'card layout'. My capabilities are expanding every day!",
-//             code: null
-//         };
-//     }
-// });
-// --- NEW SERVER-BASED AI LOGIC ---
-// This function now calls our Node.js backend to get a real AI response.
-// In public/script.js
-
-// --- THIS IS THE CORRECTED AND IMPROVED FUNCTION ---
-async function generateAiResponse(userPrompt) {
-  try {
-    const response = await fetch('https://codeweaver-ai-app.onrender.com/api/generate-code', {
-      // --- THE FIX IS HERE ---
-      // We are explicitly telling the browser to send a POST request.
-      method: 'POST', 
-      // ----------------------
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ prompt: userPrompt }),
-    });
-
-    // Improved error handling to give you clearer messages in the future.
-    if (!response.ok) {
-      // If the server sends a 404 or 500 error, this block will run.
-      // We use .text() because the error response might be HTML, not JSON.
-      const errorText = await response.text(); 
-      throw new Error(`Server responded with status: ${response.status}. Body: ${errorText}`);
+        return result.substring(1, result.length-3);
     }
-
-    // If we get here, the response was successful (e.g., status 200).
-    // Now it's safe to parse it as JSON.
-    const data = await response.json();
-    return data;
-
-  } catch (error) {
-    // This will catch both network errors (like "Failed to fetch")
-    // and the server errors we threw above.
-    console.error('Error fetching from AI server:', error);
-    return {
-      message: `I'm having trouble connecting to my brain right now. Please check the server logs. Error: ${error.message}`,
-      code: null,
-    };
-  }
-}
-
-// We also need to update the handleUserMessage function to be async
-// Find the original `handleUserMessage` function and replace it with this:
-async function handleUserMessage() { // Notice the 'async' keyword here
-    const messageText = chatInput.value.trim();
-    if (!messageText) return;
-
-    displayUserMessage(messageText);
-    chatInput.value = '';
-    
-    showTypingIndicator();
-
-    // Now we 'await' the response from our server
-    const aiResponse = await generateAiResponse(messageText);
-    
-    removeTypingIndicator();
-    displayAiMessage(aiResponse.message);
-    
-    if (aiResponse.code) {
-        // The logic for appending code remains the same
-        const bodyEnd = fullHtmlContent.lastIndexOf('</body>');
-        fullHtmlContent = fullHtmlContent.substring(0, bodyEnd) + aiResponse.code + '\n</body>\n</html>';
-        
-        codeEditor.value = fullHtmlContent;
-        updatePreview(fullHtmlContent);
-    }
-}
- });
+});
