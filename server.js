@@ -325,7 +325,7 @@ app.post('/api/generate-code', async (req, res) => {
     if (!prompt) {
       return res.status(400).json({ error: 'Prompt is required.' });
     }
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-latest" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const fullPrompt = `
       You are CodeWeaver AI, an expert web developer specializing in creating self-contained HTML and CSS components.
       Your task is to take a user's description and generate the corresponding HTML and CSS code.
