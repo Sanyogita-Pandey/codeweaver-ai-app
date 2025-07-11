@@ -1,83 +1,80 @@
 // --- IMPORTANT SECURITY NOTICE ---
-// Your API key was previously hardcoded. That key should be considered
-// compromised. Please generate a new key in Google AI Studio and
-// store it securely as an Environment Variable, NOT in the code.
+// Ensure your API key is stored securely as an Environment Variable
+// on Render and NOT hardcoded in your code.
 
-// Load environment variables from a .env file for local development
-
+require('dotenv').config(); // For local .env file
 const express = require('express');
 const cors = require('cors');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
+// --- 1. INITIALIZE APP ---
 const app = express();
 const PORT = process.env.PORT || 3000;
+console.log("App initialized.");
 
-// --- Middleware ---
-
-// 1. CONFIGURED CORS
-// Create a whitelist of allowed domains.
-// Add the URL of your deployed front-end application here.
+// --- 2. SETUP MIDDLEWARE ---
+// A robust CORS setup is crucial for production.
 const allowedOrigins = [
-  'https://codeweaver-ai-app-12.onrender.com', // <-- Replace with your Render Static Site URL
-  'https://github.com/Sanyogita-Pandey/codeweaver-ai-app',          // <-- Or replace with your GitHub Pages URL
-  // Keep these for local testing:
-  'http://localhost:3000',
-  'http://127.0.0.1:5500'
+  'https://codeweaver-ai-app-12.onrender.com', // Your live front-end
+  'http://localhost:5500',                    // For local testing
+  'http://127.0.0.1:5500'                     // For local testing
 ];
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like Postman, mobile apps) or from the whitelist
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error(`Origin ${origin} not allowed by CORS`));
     }
   }
 };
-
-// Use the configured CORS options
 app.use(cors(corsOptions));
+console.log("CORS middleware configured.");
 
-// Use express.json() to parse JSON request bodies
+// JSON body parser
 app.use(express.json());
+console.log("JSON parser middleware configured.");
 
 
-// --- Google AI Client Initialization ---
+// --- 3. GOOGLE AI CLIENT SETUP ---
 
-// 2. SECURE API KEY HANDLING
-// The key is safely loaded from environment variables.
-const GOOGLE_API_KEY = "AIzaSyB5D-OeNpFJQo7orqHlD620nZBG7SAoGBY";
+const GOOGLE_API_KEY = "AIzaSyB5D-OeNpFJQo7orqHlD620nZBG7SAoGBY" ;
 
 if (!GOOGLE_API_KEY) {
-  console.error("FATAL ERROR: GOOGLE_API_KEY is not defined in your environment variables.");
-  // On Render, check your Environment settings. Locally, check your .env file.
-  process.exit(1);
+  console.error("FATAL ERROR: GOOGLE_API_KEY environment variable is not set.");
+  process.exit(1); // Stop the server if the key is missing
 }
 
 const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
+console.log("Google AI client initialized.");
 
-// --- Health Check Endpoint (for debugging) ---
+
+// --- 4. DEFINE ALL ROUTES ---
+
+// Health Check Endpoint
 app.get('/healthcheck', (req, res) => {
-  console.log("Health check endpoint was hit!");
+  console.log(`[${new Date().toISOString()}] GET /healthcheck endpoint hit.`);
   res.status(200).json({
     status: "ok",
-    message: "Server is alive and responding.",
-    timestamp: new Date().toISOString()
+    message: "Server is alive and the healthcheck route is registered.",
   });
 });
+console.log("GET /healthcheck route defined.");
 
-// --- API Endpoint (Your original code here is good, no changes needed) ---
+// Main API Endpoint
 app.post('/api/generate-code', async (req, res) => {
+  console.log(`[${new Date().toISOString()}] POST /api/generate-code endpoint hit.`);
   try {
     const { prompt } = req.body;
-
     if (!prompt) {
+      console.log("Request failed: Prompt was empty.");
       return res.status(400).json({ error: 'Prompt is required.' });
     }
 
     const fullPrompt = `
-      You are CodeWeaver AI, an expert web developer specializing in creating self-contained HTML and CSS components.
+       You are CodeWeaver AI, an expert web developer specializing in creating self-contained HTML and CSS components.
       Your task is to take a user's description and generate the corresponding HTML and CSS code.
       **Instructions:**
       1.  You MUST respond with a valid JSON object. Do not wrap the JSON in markdown backticks or any other text.
@@ -99,6 +96,7 @@ app.post('/api/generate-code', async (req, res) => {
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
     const aiResponseText = response.text();
+    
     let parsedResponse;
     try {
       parsedResponse = JSON.parse(aiResponseText);
@@ -106,20 +104,28 @@ app.post('/api/generate-code', async (req, res) => {
       console.error("AI did not return valid JSON. Raw response:", aiResponseText);
       throw new Error("The AI response was not in the expected format.");
     }
-
+    
     res.json(parsedResponse);
 
   } catch (error) {
-    console.error('Error in /api/generate-code endpoint:', error);
+    console.error('Error in /api/generate-code endpoint:', error.message);
     res.status(500).json({ 
-        message: 'An error occurred on the server. Please check the server logs for details.',
+        message: 'An error occurred on the server while processing the request.',
         code: `<!-- Server Error: ${error.message} -->` 
     });
   }
 });
+console.log("POST /api/generate-code route defined.");
+
+// A catch-all route for 404s (optional but good for debugging)
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] 404 Not Found for ${req.method} ${req.originalUrl}`);
+    res.status(404).send("Sorry, that route does not exist.");
+});
+console.log("404 catch-all route defined.");
 
 
-// --- Start the server ---
-app.listen(PORT,'0.0.0.0', () => {
-  console.log(`CodeWeaver AI server is running on port ${PORT}`);
+// --- 5. START THE SERVER ---
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server startup complete. Listening on port ${PORT}`);
 });
