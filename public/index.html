@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeWeaver AI - Weave Your Ideas into Websites</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Roboto+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- ===== Login Page ===== -->
+    <div id="login-page">
+        <div class="login-container">
+            <div class="logo">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <h1>CodeWeaver AI</h1>
+            </div>
+            <p class="tagline">Weave your ideas into websites, live.</p>
+            
+            <form id="login-form">
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+            
+            <div class="divider">or</div>
+            
+            <button id="guest-btn" class="guest-button">
+                <i class="fa-solid fa-user-secret"></i> Continue as Guest
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== Main App Workspace (Initially Hidden) ===== -->
+    <main id="app-workspace" class="hidden">
+        <!-- Chat Container (Left Side) -->
+        <div id="chat-container">
+            <div class="pane-header">
+                <h3><i class="fa-solid fa-comments"></i> Chat with AI</h3>
+                <button class="fullscreen-btn" data-target="chat-container" title="Toggle Fullscreen">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
+            </div>
+            <div id="chat-messages">
+                <!-- AI Welcome Message -->
+                <div class="message ai-message">
+                    <i class="fa-solid fa-robot icon"></i>
+                    <div class="text">Hello! I'm CodeWeaver AI. Describe the website you want to build. For example, try asking for "a simple hero section" or "a three-column pricing table".</div>
+                </div>
+            </div>
+            <div id="chat-input-area">
+                <div id="suggestions" class="hidden">
+                    <div class="suggestion-item" data-prompt="Create a modern navigation bar with a logo and four links.">Navbar</div>
+                    <div class="suggestion-item" data-prompt="Create a hero section with a large heading, a sub-heading, and a call-to-action button.">Hero Section</div>
+                    <div class="suggestion-item" data-prompt="Create a 3-card layout with an image, title, and description in each card.">Card Layout</div>
+                    <div class="suggestion-item" data-prompt="Create a simple contact form with fields for name, email, and message.">Contact Form</div>
+                </div>
+                <button id="magic-wand-btn" title="Show Suggestions"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+                <input type="text" id="chat-input" placeholder="e.g., 'Create a dark-themed footer with social media icons'...">
+                <button id="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+        <!-- Editor & Preview Container (Right Side) -->
+        <div id="editor-container">
+            <div class="pane-header">
+                <h3><i class="fa-solid fa-code"></i> Code & <i class="fa-solid fa-eye"></i> Live Preview</h3>
+                <button class="fullscreen-btn" data-target="editor-container" title="Toggle Fullscreen">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
+            </div>
+            <div class="editor-content">
+                <div class="code-area">
+                    <div class="code-header">
+                        <span>HTML & CSS</span>
+                        <div class="code-actions">
+                            <button id="download-btn" title="Download as HTML file"><i class="fa-solid fa-download"></i> Download</button>
+                            <button id="copy-btn" title="Copy Code"><i class="fa-solid fa-copy"></i> Copy</button>
+                        </div>
+                    </div>
+                    <textarea id="code-editor" spellcheck="false" readonly></textarea>
+                </div>
+                <div class="preview-area">
+                     <iframe id="live-preview" title="Live Website Preview"></iframe>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
