@@ -40,7 +40,7 @@ console.log("JSON parser middleware configured.");
 
 // --- 3. GOOGLE AI CLIENT SETUP ---
 
-const GOOGLE_API_KEY = "AIzaSyCfTF_hDuz8TDVjDIcY0xRW8RKoCYgHwjU" ;
+const GOOGLE_API_KEY = "AIzaSyDipQ437B-eyMcxEfuKmzJhvkesc-lPfhY" ;
 
 if (!GOOGLE_API_KEY) {
   console.error("FATAL ERROR: GOOGLE_API_KEY environment variable is not set.");
