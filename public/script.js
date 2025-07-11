@@ -205,8 +205,8 @@ ${bodyContent}
 </html>`;
     }
 
-    // --- MOCK AI LOGIC ---
-    // In a real application, this would be an API call to a service like GPT-4.
+//     --- MOCK AI LOGIC ---
+//     In a real application, this would be an API call to a service like GPT-4.
 //     function generateAiResponse(prompt) {
 //         const lowerPrompt = prompt.toLowerCase();
 
@@ -299,7 +299,8 @@ ${bodyContent}
 // This function now calls our Node.js backend to get a real AI response.
 async function generateAiResponse(userPrompt) {
   try {
-    const response = await fetch('https://codeweaver-server.onrender.com/api/generate-code', {
+    // https://codeweaver-server.onrender.com/api/generate-code
+    const response = await fetch('https://codeweaver-ai-app.onrender.com/api/generate-code', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -9,13 +9,13 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // --- 1. INITIALIZE APP ---
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5500;
 console.log("App initialized.");
 
 // --- 2. SETUP MIDDLEWARE ---
 // A robust CORS setup is crucial for production.
 const allowedOrigins = [
-  'https://codeweaver-ai-app-12.onrender.com', // Your live front-end
+ 'Access-Control-Allow-Origin: https://codeweaver-ai-app-12.onrender.com', // Your live front-end
   'http://localhost:5500',                    // For local testing
   'http://127.0.0.1:5500'                     // For local testing
 ];
@@ -40,7 +40,7 @@ console.log("JSON parser middleware configured.");
 
 // --- 3. GOOGLE AI CLIENT SETUP ---
 
-const GOOGLE_API_KEY = "AIzaSyB5D-OeNpFJQo7orqHlD620nZBG7SAoGBY" ;
+const GOOGLE_API_KEY = "AIzaSyCfTF_hDuz8TDVjDIcY0xRW8RKoCYgHwjU" ;
 
 if (!GOOGLE_API_KEY) {
   console.error("FATAL ERROR: GOOGLE_API_KEY environment variable is not set.");
