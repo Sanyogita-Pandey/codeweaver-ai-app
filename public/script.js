@@ -98,32 +98,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- Corrected fetch function for a TWO-SERVICE deployment ---
 async function generateAiResponse(userPrompt) {
-  try {
-    // This MUST be the full URL of your back-end Web Service.
-    const response = await fetch('https://codeweaver-ai-app.onrender.com/api/generate-code', {
-      method: 'POST', 
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ prompt: userPrompt }),
-    });
+        try {
+            // This MUST be the full, absolute URL of your back-end Web Service.
+            const response = await fetch('https://codeweaver-ai-app.onrender.com/api/generate-code', {
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: userPrompt }),
+            });
 
-    if (!response.ok) {
-      const errorText = await response.text(); 
-      throw new Error(`Server responded with status: ${response.status}. Body: ${errorText}`);
+            if (!response.ok) {
+                const errorText = await response.text(); 
+                throw new Error(`Server responded with status: ${response.status}. Body: ${errorText}`);
+            }
+            const data = await response.json();
+            return data;
+
+        } catch (error) {
+            console.error('Error fetching from AI server:', error);
+            return {
+                message: `An error occurred. Please check the browser console for details. Error: ${error.message}`,
+                code: null,
+            };
+        }
     }
-
-    const data = await response.json();
-    return data;
-
-  } catch (error) {
-    console.error('Error fetching from AI server:', error);
-    return {
-      message: `An error occurred. Please check the browser console. Error: ${error.message}`,
-      code: null,
-    };
-  }
-}
 
     function displayUserMessage(text) {
         const messageEl = document.createElement('div');
