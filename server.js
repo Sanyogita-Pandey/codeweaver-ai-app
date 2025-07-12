@@ -55,7 +55,7 @@ app.post('/api/generate-code', async (req, res) => {
     }
 
     // Use the stable and universally available model name.
-    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     
     const fullPrompt = `
       You are CodeWeaver AI, an expert web developer specializing in self-contained HTML and CSS components.
