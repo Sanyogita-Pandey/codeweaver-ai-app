@@ -14,7 +14,8 @@ const PORT = process.env.PORT || 3000;
 const allowedOrigins = [
   'https://codeweaver-ai-app-12.onrender.com', // Your live front-end on Render
   'http://localhost:5500',                    // For local testing
-  'http://127.0.0.1:5500'
+  'http://127.0.0.1:5500',
+  'https://github.com/Sanyogita-Pandey'
 ];
 
 const corsOptions = {
