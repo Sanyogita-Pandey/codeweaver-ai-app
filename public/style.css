@@ -615,7 +615,15 @@ button:hover {
     #app-workspace.view-editor #chat-container {
         display: none;
     }
+    #deploy-btn {
+    background-color: #00c7b7; /* Netlify's brand color is great for deploy */
+    color: white;
+    font-weight: bold;
+}
 
+#deploy-btn:hover {
+    background-color: #00a294;
+}
     /* --- 3. Mobile Navigation Bar --- */
     #mobile-view-switcher {
         display: flex; /* Show the nav on mobile */

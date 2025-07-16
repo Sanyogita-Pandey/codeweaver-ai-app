@@ -20,15 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadBtn = document.getElementById('download-btn');
     const fullscreenBtns = document.querySelectorAll('.fullscreen-btn');
     const toggleSplitViewBtn = document.getElementById('toggle-split-view-btn');
-    const deployNetlifyBtn = document.getElementById('deploy-netlify-btn');
+    // Note: The deploy button ID should be updated in your HTML to 'deploy-btn'
+    const deployBtn = document.getElementById('deploy-btn') || document.getElementById('deploy-netlify-btn');
 
-
-    const netlifyModalOverlay = document.getElementById('netlify-modal-overlay');
-    const netlifyTokenInput = document.getElementById('netlify-token-input');
-    const modalCancelBtn = document.getElementById('modal-cancel-btn');
-    const modalSaveDeployBtn = document.getElementById('modal-save-deploy-btn');
-    
-    // --- NEW: Mobile View Switcher Elements ---
+    // --- Mobile View Switcher Elements ---
     const showChatBtn = document.getElementById('show-chat-btn');
     const showEditorBtn = document.getElementById('show-editor-btn');
 
@@ -51,128 +46,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     copyBtn.addEventListener('click', copyCode);
-    downloadBtn.addEventListener('click', downloadCode);
+    downloadBtn.addEventListener('click', downloadCodeAsHTML); // Renamed for clarity
     fullscreenBtns.forEach(btn => {
         btn.addEventListener('click', () => toggleFullscreen(btn.getAttribute('data-target')));
     });
     toggleSplitViewBtn.addEventListener('click', toggleSplitView);
-     deployNetlifyBtn.addEventListener('click', handleNetlifyDeployClick);
-    modalCancelBtn.addEventListener('click', hideNetlifyModal);
-    modalSaveDeployBtn.addEventListener('click', saveTokenAndDeploy);
-    netlifyModalOverlay.addEventListener('click', (e) => {
-        if (e.target === netlifyModalOverlay) {
-            hideNetlifyModal();
-        }
-    }); 
+    deployBtn.addEventListener('click', deployViaNetlifyDrop); // Main change here
 
-    // --- NEW: Mobile View Switcher Event Listeners ---
+    // --- Mobile View Switcher Event Listeners ---
     showChatBtn.addEventListener('click', () => setMobileView('chat'));
     showEditorBtn.addEventListener('click', () => setMobileView('editor'));
 
-    // --- Main Functions ---
 
-     function handleNetlifyDeployClick() {
-        const token = localStorage.getItem('netlify_token');
-        if (token) {
-            deployToNetlify(token);
-        } else {
-            showNetlifyModal();
-        }
-    }
+    // =============================================
+    // ===== CORE APP FUNCTIONS (UNCHANGED) =====
+    // =============================================
 
-    function showNetlifyModal() {
-        netlifyModalOverlay.classList.remove('hidden');
-    }
-
-    function hideNetlifyModal() {
-        netlifyModalOverlay.classList.add('hidden');
-    }
-
-    function saveTokenAndDeploy() {
-        const token = netlifyTokenInput.value.trim();
-        if (!token) {
-            alert('Please enter a valid Netlify token.');
-            return;
-        }
-        localStorage.setItem('netlify_token', token);
-        hideNetlifyModal();
-        deployToNetlify(token);
-    }
-    
-    async function deployToNetlify(token) {
-        const originalButtonText = deployNetlifyBtn.innerHTML;
-        deployNetlifyBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deploying...';
-        deployNetlifyBtn.disabled = true;
-
-        try {
-            // 1. Create a zip file in memory
-            const zip = new JSZip();
-            zip.file("index.html", codeEditor.value);
-            const zipBlob = await zip.generateAsync({ type: "blob" });
-
-            // 2. Create a new site on Netlify
-            const createSiteResponse = await fetch('https://api.netlify.com/api/v1/sites', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({}) // Create a site with a random name
-            });
-
-            if (!createSiteResponse.ok) {
-                if (createSiteResponse.status === 401) throw new Error('Netlify token is invalid or expired. Please provide a new one.');
-                throw new Error(`Netlify API Error (Site Creation): ${createSiteResponse.statusText}`);
-            }
-            const siteData = await createSiteResponse.json();
-            const siteId = siteData.id;
-
-            // 3. Deploy the zip file to the new site
-            const deployResponse = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}/deploys`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/zip',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: zipBlob
-            });
-
-            if (!deployResponse.ok) {
-                throw new Error(`Netlify API Error (Deploy): ${deployResponse.statusText}`);
-            }
-            const deployData = await deployResponse.json();
-            
-            // Success!
-            const liveUrl = deployData.ssl_url || deployData.url;
-            deployNetlifyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Deployed!';
-            alert(`✅ Success! Your site is live at:\n${liveUrl}`);
-            
-            // Open the new site in a new tab for the user
-            window.open(liveUrl, '_blank');
-
-        } catch (error) {
-            console.error('Netlify deployment failed:', error);
-            alert(`❌ Deployment Failed: ${error.message}`);
-            deployNetlifyBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Failed';
-        } finally {
-            // Reset button after a few seconds
-            setTimeout(() => {
-                deployNetlifyBtn.innerHTML = originalButtonText;
-                deployNetlifyBtn.disabled = false;
-            }, 4000);
-        }
-    }
-    
-    // Your original deployToCodePen function (renamed button)
-    function deployToCodePen() {
-        //... (this function's content remains the same)
-    }
     function showWorkspace() {
         loginPage.classList.add('hidden');
         appWorkspace.classList.remove('hidden');
         codeEditor.value = fullHtmlContent;
         updatePreview(fullHtmlContent);
-        setMobileView('chat'); // Default to chat view
+        setMobileView('chat');
     }
 
     async function handleUserMessage() {
@@ -194,7 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
             codeEditor.value = fullHtmlContent;
             updatePreview(fullHtmlContent);
             
-            // Auto-switch to editor view on mobile after generating code
             if (window.innerWidth <= 768) {
                 setMobileView('editor');
             }
@@ -264,17 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function downloadCode() {
-        const blob = new Blob([codeEditor.value], { type: 'text/html' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'codeweaver-site.html';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(a.href);
-    }
-
     function toggleFullscreen(targetId) {
         const className = targetId === 'chat-container' ? 'chat-fullscreen' : 'editor-fullscreen';
         appWorkspace.classList.toggle(className);
@@ -294,66 +177,93 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function deployToCodePen() {
-        const code = codeEditor.value;
-        if (!code || code.trim() === createHtmlBoilerplate('').trim()) {
-            alert("There is no code to deploy. Please generate a website first.");
-            return;
-        }
-        const { html, css } = extractHtmlAndCss(code);
-        const data = {
-            title: "My CodeWeaver AI Website",
-            html: html,
-            css: css,
-            editors: "110",
-        };
-        const form = document.createElement('form');
-        form.action = 'https://codepen.io/pen/define';
-        form.method = 'POST';
-        form.target = '_blank';
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'data';
-        input.value = JSON.stringify(data);
-        form.appendChild(input);
-        document.body.appendChild(form);
-        form.submit();
-        document.body.removeChild(form);
-    }
-
-    function extractHtmlAndCss(fullCode) {
-        let css = '';
-        let html = '';
-        const styleRegex = /<style>([\s\S]*?)<\/style>/i;
-        const styleMatch = fullCode.match(styleRegex);
-        if (styleMatch && styleMatch[1]) {
-            css = styleMatch[1].trim();
-        }
-        const bodyRegex = /<body>([\s\S]*)<\/body>/i;
-        const bodyMatch = fullCode.match(bodyRegex);
-        if (bodyMatch && bodyMatch[1]) {
-            html = bodyMatch[1].replace(styleRegex, '').trim();
-        }
-        return { html, css };
-    }
-
     function createHtmlBoilerplate(bodyContent) {
         return `<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Generated by CodeWeaver AI</title>\n</head>\n<body>\n${bodyContent}\n</body>\n</html>`;
     }
 
-    // --- NEW: Mobile View Switching Function ---
     function setMobileView(view) {
-        // This function will only have a visible effect on mobile due to the CSS media query
         if (view === 'chat') {
             appWorkspace.classList.add('view-chat');
             appWorkspace.classList.remove('view-editor');
             showChatBtn.classList.add('active');
             showEditorBtn.classList.remove('active');
-        } else { // 'editor'
+        } else {
             appWorkspace.classList.add('view-editor');
             appWorkspace.classList.remove('view-chat');
             showEditorBtn.classList.add('active');
             showChatBtn.classList.remove('active');
         }
+    }
+
+    // =========================================================
+    // ===== NEW DEPLOYMENT AND DOWNLOAD FUNCTIONS =====
+    // =========================================================
+
+    /**
+     * Creates a zip file of the website, downloads it for the user,
+     * and opens the Netlify Drop page for instant, no-token deployment.
+     */
+    async function deployViaNetlifyDrop() {
+        const code = codeEditor.value;
+        if (!code || code.trim() === createHtmlBoilerplate('').trim()) {
+            alert("There is no code to deploy. Please generate a website first.");
+            return;
+        }
+
+        const originalButtonText = deployBtn.innerHTML;
+        deployBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Preparing...';
+        deployBtn.disabled = true;
+
+        try {
+            // 1. Create a zip file containing index.html using the JSZip library
+            const zip = new JSZip();
+            zip.file("index.html", code);
+            const zipBlob = await zip.generateAsync({ type: "blob" });
+
+            // 2. Create a temporary link to download the zip file
+            const downloadUrl = URL.createObjectURL(zipBlob);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = 'codeweaver-site.zip'; // This is the file the user will drag and drop
+            
+            // 3. Programmatically click the link to start the download
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(downloadUrl);
+
+            // 4. Open Netlify Drop in a new tab for the user
+            window.open('https://app.netlify.com/drop', '_blank');
+
+            // 5. Update UI to show success
+            deployBtn.innerHTML = '<i class="fa-solid fa-check"></i> Ready to Drop!';
+            
+        } catch (error) {
+            console.error('Failed to prepare for Netlify Drop:', error);
+            alert(`An error occurred while preparing the file: ${error.message}`);
+            deployBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Error';
+        } finally {
+            // Reset the button after a few seconds
+            setTimeout(() => {
+                deployBtn.innerHTML = originalButtonText.includes("Netlify") 
+                    ? '<i class="fa-solid fa-cloud-arrow-up"></i> Deploy' 
+                    : originalButtonText;
+                deployBtn.disabled = false;
+            }, 5000);
+        }
+    }
+
+    /**
+     * Downloads only the single index.html file.
+     */
+    function downloadCodeAsHTML() {
+        const blob = new Blob([codeEditor.value], { type: 'text/html' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'index.html';
+        document.body.appendChild(a);
+a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
     }
 });
