@@ -1,4 +1,3 @@
-/* ===== Global Styles & Variables ===== */
 :root {
     --bg-dark: #1a1a2e;
     --bg-medium: #16213e;
@@ -421,4 +420,254 @@ button:hover {
     width: 0;
     padding: 0;
     opacity: 0;
+}
+.pane-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.pane-header .header-actions {
+    display: flex;
+    gap: 8px;
+}
+.pane-header button {
+    background: none;
+    border: none;
+    color: #a0aec0;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+}
+.pane-header button:hover {
+    color: #fff;
+}
+
+/* --- Split View Functionality --- */
+.editor-content {
+    display: flex;
+    flex-direction: column; /* Default: stacked view */
+    height: 100%;
+    overflow: hidden;
+}
+.code-area, .preview-area {
+    flex: 1;
+    min-height: 0; /* Prevents flexbox overflow */
+    display: flex;
+    flex-direction: column;
+}
+.preview-area {
+    border-top: 2px solid #2d3748;
+}
+
+/* --- The Active Split-View State --- */
+.editor-content.split-view-active {
+    flex-direction: row; /* Side-by-side view */
+}
+.editor-content.split-view-active .preview-area {
+    border-top: none;
+    border-left: 2px solid #2d3748;
+}
+
+/* --- Styling for the new Deploy button --- */
+#deploy-btn {
+    background-color: #38a169; /* Green */
+    color: white;
+}
+#deploy-btn:hover {
+    background-color: #2f855a;
+}
+#deploy-btn i {
+    margin-right: 5px;
+}
+#deploy-netlify-btn {
+    background-color: #00c7b7; /* Netlify's brand color */
+    color: white;
+}
+#deploy-netlify-btn:hover {
+    background-color: #00a294;
+}
+#deploy-codepen-btn {
+    background-color: #343a40;
+    color: white;
+}
+#deploy-codepen-btn:hover {
+    background-color: #23272b;
+}
+
+/* Modal Overlay (the dark background) */
+#netlify-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+#netlify-modal-overlay:not(.hidden) {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Modal Content Box */
+#netlify-modal {
+    background: #2d3748;
+    color: #e2e8f0;
+    padding: 25px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+#netlify-modal h3 {
+    margin-top: 0;
+    color: white;
+    border-bottom: 1px solid #4a5568;
+    padding-bottom: 10px;
+}
+
+#netlify-modal p {
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.modal-link {
+    display: inline-block;
+    margin-bottom: 15px;
+    color: #4299e1;
+    text-decoration: none;
+    font-size: 14px;
+}
+.modal-link:hover {
+    text-decoration: underline;
+}
+.modal-link i {
+    margin-left: 4px;
+}
+
+#netlify-token-input {
+    width: 100%;
+    padding: 10px;
+    background: #1a202c;
+    border: 1px solid #4a5568;
+    border-radius: 4px;
+    color: white;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-actions button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+#modal-cancel-btn {
+    background-color: #4a5568;
+    color: white;
+}
+#modal-save-deploy-btn {
+    background-color: #00c7b7;
+    color: #1a202c;
+    font-weight: bold;
+}
+
+
+/* ================================================= */
+/* ===== MOBILE RESPONSIVE STYLES (768px below) ===== */
+/* ================================================= */
+@media (max-width: 768px) {
+    
+    /* --- 1. Main Layout: Stack panes vertically --- */
+    #app-workspace {
+        flex-direction: column;
+        height: 100vh; /* Ensure it takes full screen height */
+        padding-bottom: 60px; /* Make space for the fixed bottom nav */
+    }
+
+    #chat-container,
+    #editor-container {
+        width: 100%;
+        height: 100%; /* Each pane takes full height when active */
+        border: none;
+    }
+
+    /* --- 2. View Switching Logic: Show one pane at a time --- */
+    #app-workspace.view-chat #editor-container {
+        display: none;
+    }
+    #app-workspace.view-editor #chat-container {
+        display: none;
+    }
+
+    /* --- 3. Mobile Navigation Bar --- */
+    #mobile-view-switcher {
+        display: flex; /* Show the nav on mobile */
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        background-color: #1a202c;
+        border-top: 1px solid #4a5568;
+        z-index: 1000;
+    }
+    #mobile-view-switcher button {
+        flex: 1; /* Each button takes 50% width */
+        background: none;
+        border: none;
+        color: #a0aec0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        gap: 4px;
+        cursor: pointer;
+    }
+    #mobile-view-switcher button i {
+        font-size: 20px;
+    }
+    #mobile-view-switcher button.active {
+        color: #4299e1; /* Blue for active state */
+        background-color: #2d3748;
+    }
+
+    /* --- 4. Tweak UI Elements for Mobile --- */
+    /* Hide desktop-only buttons */
+    #toggle-split-view-btn,
+    .fullscreen-btn {
+        display: none;
+    }
+    /* Force editor to be stacked vertically */
+    .editor-content {
+        flex-direction: column !important; /* Use !important to override JS-added class */
+    }
+    .editor-content .preview-area {
+        border-left: none !important;
+        border-top: 2px solid #2d3748 !important;
+    }
+    /* Ensure chat input is usable */
+    #chat-input-area {
+        padding: 8px;
+    }
+    .pane-header h3 {
+        font-size: 16px;
+    }
 }
