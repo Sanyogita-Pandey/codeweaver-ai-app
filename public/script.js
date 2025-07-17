@@ -275,7 +275,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- Server Endpoints ---
-    const AI_SERVER_URL = 'https://api.your-ai-server.com/generate'; // The URL that is causing the 500 error
+    const AI_SERVER_URL = 'https://https://codeweaver-ai-app.onrender.com/generate'; // The URL that is causing the 500 error
     const DEPLOY_SERVER_URL = 'https://codeweaver-ai-app.onrender.com';
 
     // --- Page Elements ---
