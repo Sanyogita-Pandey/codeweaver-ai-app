@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const JSZip = require('jszip');
-const fetch = require('node-fetch'); // Netlify deploy needs a fetch implementation in Node
+// const fetch = require('node-fetch'); // Netlify deploy needs a fetch implementation in Node
 
 // --- 1. INITIALIZE APP ---
 const app = express();
