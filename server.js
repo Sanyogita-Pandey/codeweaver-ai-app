@@ -49,15 +49,28 @@ app.get('/healthcheck', (req, res) => {
 });
 
 app.post('/api/generate-code', async (req, res) => {
-  // Your existing, correct /api/generate-code logic goes here...
-  // (This part of your code was fine)
+ 
   try {
     const { prompt } = req.body;
     if (!prompt) {
       return res.status(400).json({ error: 'Prompt is required.' });
     }
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const fullPrompt = `You are CodeWeaver AI... (your full prompt)`; // Abridged for clarity
+    const fullPrompt = ` You are CodeWeaver AI, an expert web developer specializing in self-contained HTML, CSS, and JavaScript components.
+      Your task is to take a user's description and generate the corresponding code.
+
+      Instructions:
+      1. You MUST respond with a valid JSON object, and nothing else. Do not use markdown like \`\`\`json.
+      2. The JSON object must have exactly two keys: "message" and "code".
+      3. The "message" key should contain a friendly, conversational text response.
+      4. The "code" key must be a single string containing the component's HTML.
+      5. If CSS is needed for styling, include it directly inside a <style> tag within the 'code' string.
+      6. If JavaScript is needed for interactivity (like button clicks, counters, animations, etc.), include it directly inside a <script> tag within the 'code' string. The script should be self-contained and not require external files.
+      7. Do NOT include <html>, <head>, or <body> tags in your 'code' response. Just provide the component code.
+
+      Example: If a user asks for 'a button that shows an alert when clicked', your 'code' response should include the <button> HTML and a <script> tag with an event listener.
+
+      User Request: "${prompt}"  `; // Abridged for clarity
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
     let aiResponseText = response.text();
