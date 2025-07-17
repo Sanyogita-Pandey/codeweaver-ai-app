@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => toggleFullscreen(btn.getAttribute('data-target')));
     });
     toggleSplitViewBtn.addEventListener('click', toggleSplitView);
-    deployBtn.addEventListener('click', deployViaNetlifyDrop); // Main change here
+    deployBtn.addEventListener('click', deployViaBackend);; // Main change here
 
     // --- Mobile View Switcher Event Listeners ---
     showChatBtn.addEventListener('click', () => setMobileView('chat'));

@@ -48,52 +48,14 @@ app.get('/healthcheck', (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-app.post('/api/generate-code', async (req, res) => {
+    app.post('/api/generate-code', async (req, res) => {
+  console.log("Received request for /api/generate-code"); // Log entry
   try {
     const { prompt } = req.body;
     if (!prompt) {
+      console.error("Validation Error: Prompt is missing.");
       return res.status(400).json({ error: 'Prompt is required.' });
     }
-    app.post('/api/deploy', async (req, res) => {
-    try {
-        const { code } = req.body;
-        if (!code) {
-            return res.status(400).json({ success: false, message: 'No code provided.' });
-        }
-
-        // 1. Create a zip file in memory
-        const zip = new JSZip();
-        zip.file("index.html", code);
-        // Use 'buffer' for Node.js environments
-        const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
-
-        // 2. Deploy the zip file to the pre-configured Netlify site
-        const deployResponse = await fetch(`https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/deploys`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/zip',
-                'Authorization': `Bearer ${NETLIFY_ACCESS_TOKEN}`
-            },
-            body: zipBuffer
-        });
-
-        if (!deployResponse.ok) {
-            const errorData = await deployResponse.json();
-            throw new Error(`Netlify API Error: ${errorData.message || deployResponse.statusText}`);
-        }
-        
-        const deployData = await deployResponse.json();
-        const liveUrl = deployData.ssl_url || deployData.url;
-
-        // 3. Send the live URL back to the client
-        res.json({ success: true, url: liveUrl });
-
-    } catch (error) {
-        console.error('Netlify deployment failed:', error);
-        res.status(500).json({ success: false, message: `Deployment Failed: ${error.message}` });
-    }
-});
-
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Using the latest flash model
     
     // ======================================================================
