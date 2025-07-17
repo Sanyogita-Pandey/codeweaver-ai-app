@@ -203,56 +203,59 @@ document.addEventListener('DOMContentLoaded', () => {
      * Creates a zip file of the website, downloads it for the user,
      * and opens the Netlify Drop page for instant, no-token deployment.
      */
-    async function deployViaNetlifyDrop() {
-        const code = codeEditor.value;
-        if (!code || code.trim() === createHtmlBoilerplate('').trim()) {
-            alert("There is no code to deploy. Please generate a website first.");
-            return;
-        }
-
-        const originalButtonText = deployBtn.innerHTML;
-        deployBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Preparing...';
-        deployBtn.disabled = true;
-
-        try {
-            // 1. Create a zip file containing index.html using the JSZip library
-            const zip = new JSZip();
-            zip.file("index.html", code);
-            const zipBlob = await zip.generateAsync({ type: "blob" });
-
-            // 2. Create a temporary link to download the zip file
-            const downloadUrl = URL.createObjectURL(zipBlob);
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = 'codeweaver-site.zip'; // This is the file the user will drag and drop
-            
-            // 3. Programmatically click the link to start the download
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(downloadUrl);
-
-            // 4. Open Netlify Drop in a new tab for the user
-            window.open('https://app.netlify.com/drop', '_blank');
-
-            // 5. Update UI to show success
-            deployBtn.innerHTML = '<i class="fa-solid fa-check"></i> Ready to Drop!';
-            
-        } catch (error) {
-            console.error('Failed to prepare for Netlify Drop:', error);
-            alert(`An error occurred while preparing the file: ${error.message}`);
-            deployBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Error';
-        } finally {
-            // Reset the button after a few seconds
-            setTimeout(() => {
-                deployBtn.innerHTML = originalButtonText.includes("Netlify") 
-                    ? '<i class="fa-solid fa-cloud-arrow-up"></i> Deploy' 
-                    : originalButtonText;
-                deployBtn.disabled = false;
-            }, 5000);
-        }
+    async function deployViaBackend() {
+    const code = codeEditor.value;
+    if (!code || code.trim() === createHtmlBoilerplate('').trim()) {
+        alert("There is no code to deploy. Please generate a website first.");
+        return;
     }
 
+    const originalButtonText = deployBtn.innerHTML;
+    deployBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deploying...';
+    deployBtn.disabled = true;
+
+    try {
+        const response = await fetch('https://YOUR_SERVER_URL/api/deploy', { // IMPORTANT: Use your Render server URL
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ code: code })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'An unknown error occurred during deployment.');
+        }
+        
+        // SUCCESS!
+        deployBtn.innerHTML = '<i class="fa-solid fa-check"></i> Deployed!';
+        
+        // Create a dismissible success message with the link
+        const successMessage = document.createElement('div');
+        successMessage.className = 'deploy-success-message';
+        successMessage.innerHTML = `
+            <p>✅ Success! Your site is live:</p>
+            <a href="${data.url}" target="_blank">${data.url}</a>
+            <button onclick="this.parentElement.remove()">×</button>
+        `;
+        document.body.appendChild(successMessage);
+        
+        // Optional: Also copy the link to the clipboard
+        navigator.clipboard.writeText(data.url).catch(err => console.error('Failed to copy link:', err));
+        
+    } catch (error) {
+        console.error('Deployment failed:', error);
+        alert(`❌ Deployment Failed: ${error.message}`);
+        deployBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Failed';
+    } finally {
+        setTimeout(() => {
+            deployBtn.innerHTML = originalButtonText;
+            deployBtn.disabled = false;
+        }, 5000);
+    }
+}
     /**
      * Downloads only the single index.html file.
      */

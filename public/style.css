@@ -624,6 +624,24 @@ button:hover {
 #deploy-btn:hover {
     background-color: #00a294;
 }
+.deploy-success-message {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #2f855a;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.deploy-success-message a { color: #9ae6b4; text-decoration: none; font-weight: bold; }
+.deploy-success-message a:hover { text-decoration: underline; }
+.deploy-success-message button { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
     /* --- 3. Mobile Navigation Bar --- */
     #mobile-view-switcher {
         display: flex; /* Show the nav on mobile */
