@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
     deployBtn.disabled = true;
 
     try {
-        const response = await fetch('https://YOUR_SERVER_URL/api/deploy', { // IMPORTANT: Use your Render server URL
+        const response = await fetch('https://codeweaver-ai-app.onrender.com', { // IMPORTANT: Use your Render server URL
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
