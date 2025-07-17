@@ -85,7 +85,6 @@ app.post('/generate', async (req, res) => {
 // ===== FIX: Route path changed for consistency =====
 app.post('/deploy', async (req, res) => {
     try {
-         const fetch = (await import('node-fetch')).default;
 
         const { code } = req.body;
         if (!code) {
@@ -123,7 +122,7 @@ app.post('/deploy', async (req, res) => {
 
 
 // --- 5. START THE SERVER ---
-app.listen(PORT, () => { // Removed '0.0.0.0' as Render handles this automatically
+app.listen(PORT,'0.0.0.0', () => { // Removed '0.0.0.0' as Render handles this automatically
   console.log(`Server startup complete. Listening on port ${PORT}`);
 });
 
