@@ -85,6 +85,8 @@ app.post('/generate', async (req, res) => {
 // ===== FIX: Route path changed for consistency =====
 app.post('/deploy', async (req, res) => {
     try {
+         const fetch = (await import('node-fetch')).default;
+
         const { code } = req.body;
         if (!code) {
             return res.status(400).json({ success: false, message: 'No code provided for deployment.' });
