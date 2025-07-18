@@ -1,41 +1,4 @@
-// require('dotenv').config(); 
-// const express = require('express');
-// const cors = require('cors');
-// const { GoogleGenerativeAI } = require('@google/generative-ai');
-// const JSZip = require('jszip');
-// // const fetch = require('node-fetch'); // Netlify deploy needs a fetch implementation in Node
 
-// // --- 1. INITIALIZE APP ---
-// const app = express();
-// const PORT = process.env.PORT || 3000; 
-
-// // --- 2. CONFIGURE CORS ---
-// // Your CORS setup is good, no changes needed here.
-// const allowedOrigins = [
-//   'https://codeweaver-ai-app-12.onrender.com', // Your Render Frontend URL
-//   'http://localhost:5500',
-//   'http://127.0.0.1:5500',
-//   'https://sanyogita-pandey.github.io'
-// ];
-
-// const corsOptions = {
-//   origin: (origin, callback) => {
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error(`Origin ${origin} is not allowed by CORS.`));
-//     }
-//   }
-// };
-// app.use(cors(corsOptions));
-// app.use(express.json({ limit: '2mb' }));
-
-
-// // --- 3. INITIALIZE CLIENTS AND SECURELY LOAD ALL KEYS ---
-// // ===== SECURITY FIX: Load ALL keys from environment variables =====
-// const GOOGLE_API_KEY = "AIzaSyDJwMLwjA-vGdE6tVYiFZwFvTarswZug8M"; 
-// const NETLIFY_ACCESS_TOKEN = "nfp_jZpHMxPpnB2zMDvDBVVzEvahDU23DGH94156";
-// const NETLIFY_SITE_ID = "9e955514-5324-4327-be59-195e63afce1c";
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -98,7 +61,6 @@ app.post('/generate', async (req, res) => {
     const response = await result.response;
     let aiResponseText = response.text();
 
-    // ===== THE FIX IS HERE: A more robust way to extract the JSON =====
     const startIndex = aiResponseText.indexOf('{');
     const endIndex = aiResponseText.lastIndexOf('}');
 
@@ -108,7 +70,11 @@ app.post('/generate', async (req, res) => {
 
     const jsonString = aiResponseText.substring(startIndex, endIndex + 1);
     
-    const parsedResponse = JSON.parse(jsonString); // This will now parse the cleaned string
+    // ===== THE FINAL FIX IS HERE: Sanitize the string for bad backslashes =====
+    // This replaces every single backslash with a double backslash, making it JSON-safe.
+    const sanitizedJsonString = jsonString.replace(/\\/g, '\\\\');
+    
+    const parsedResponse = JSON.parse(sanitizedJsonString); // This parses the safe, sanitized string
     res.json(parsedResponse);
 
   } catch (error) {
