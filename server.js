@@ -200,13 +200,19 @@ app.post('/generate', async (req, res) => {
     
     const parsedResponse = JSON.parse(aiResponseText);
     res.json(parsedResponse);
-  } catch (error) {
-    console.error("ERROR inside /generate:", error);
+  }catch (error) {
+    console.error("======================================");
+    console.error("DETAILED ERROR in /generate route:");
+    console.error("Error Message:", error.message);
+    console.error("Full Error Object:", error); // This prints the entire error object
+    console.error("======================================");
+
+    // Send a more specific error back to the front-end
     res.status(500).json({ 
-        message: 'An internal server error occurred while generating the code.',
+        message: `Server failed: ${error.message}`, // Send the actual error message
         code: `<!-- Server Error: ${error.message} -->` 
     });
-  }
+}
 });
 
 app.post('/deploy', async (req, res) => {
