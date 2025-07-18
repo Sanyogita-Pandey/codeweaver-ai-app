@@ -42,7 +42,7 @@ if (!GOOGLE_API_KEY || !NETLIFY_ACCESS_TOKEN || !NETLIFY_SITE_ID) {
   console.error("FATAL ERROR: A required environment variable (GOOGLE_API_KEY, NETLIFY_ACCESS_TOKEN, or NETLIFY_SITE_ID) is missing!");
   process.exit(1); 
 }
-const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
+
 
 
 // --- 4. DEFINE ROUTES ---
@@ -59,6 +59,7 @@ app.post('/generate', async (req, res) => {
     if (!prompt) {
       return res.status(400).json({ error: 'Prompt is required.' });
     }
+    const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const fullPrompt = `You are CodeWeaver AI, an expert web developer specializing in self-contained HTML, CSS, and JavaScript components. You MUST respond with a valid JSON object, and nothing else. Do not use markdown like \`\`\`json. The JSON object must have exactly two keys: "message" (a friendly, conversational text response) and "code" (a single string containing the component's HTML, including any <style> or <script> tags). Do NOT include <html>, <head>, or <body> tags. User Request: "${prompt}"`;
     
