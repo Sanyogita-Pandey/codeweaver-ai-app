@@ -81,8 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.value = '';
         showTypingIndicator();
         
-        // Don't reset the content here, let the AI response handle it.
-
         const aiResponse = await generateAiResponse(messageText);
 
         removeTypingIndicator();
@@ -104,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(AI_SERVER_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: prompt }), // Ensure key is 'prompt' to match server
+                body: JSON.stringify({ prompt: prompt }),
             });
 
             if (!response.ok) {
@@ -215,29 +213,51 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-   // REPLACE your old deployViaBackend function with this new one in script.js
+    // ===== THE FINAL, CORRECTED DEPLOYMENT FUNCTION =====
+    async function deployViaBackend() {
+        console.log("Deploy button clicked. Preparing for deployment...");
 
-async function deployViaBackend() {
-    const code = codeEditor.value;
-    // Check if there is actual code to deploy, ignoring the boilerplate
-    if (!code || code.trim() === createHtmlBoilerplate('').trim()) {
-        alert("There is no code to deploy. Please generate a website first.");
-        return;
-    }
+        const codeEditor = document.getElementById('code-editor');
+        if (!codeEditor) {
+            console.error("Fatal Error: Could not find the 'code-editor' element.");
+            alert("A critical error occurred: The code editor is missing.");
+            return;
+        }
 
-    try {
-        // Save the code to the browser's session storage
-        sessionStorage.setItem('codeToDeploy', code);
-        
-        // Redirect the user to the new deployment page
-        window.location.href = 'deploy.html';
-        
-    } catch (error) {
-        // This might happen if storage is disabled in the browser
-        console.error("Failed to save code for deployment:", error);
-        alert("An error occurred while preparing for deployment. Please ensure cookies and site data are enabled for this page.");
+        const currentEditorText = codeEditor.value;
+
+        // --- THIS IS THE FIX ---
+        // Instead of sending the editor's content directly, we will extract just the
+        // body content and re-wrap it in the full HTML boilerplate.
+        // This guarantees we always deploy a complete, renderable website.
+
+        const bodyStartIndex = currentEditorText.indexOf('<body>') + 6;
+        const bodyEndIndex = currentEditorText.lastIndexOf('</body>');
+
+        if (bodyStartIndex < 6 || bodyEndIndex === -1 || bodyEndIndex < bodyStartIndex) {
+            alert("Could not find valid <body> tags in the code. Please try generating the code again before deploying.");
+            return;
+        }
+
+        // Extract only the code that's inside the body
+        const bodyContent = currentEditorText.substring(bodyStartIndex, bodyEndIndex).trim();
+
+        // Create a fresh, complete HTML document with that content
+        const fullHtmlToDeploy = createHtmlBoilerplate(bodyContent);
+
+        try {
+            // Save the *complete and correct* HTML to the browser's session storage
+            sessionStorage.setItem('codeToDeploy', fullHtmlToDeploy);
+            console.log("Full HTML code saved to sessionStorage. Redirecting to deploy.html...");
+            
+            // Redirect the user to the new deployment page
+            window.location.href = 'deploy.html';
+            
+        } catch (error) {
+            console.error("Failed to save code for deployment:", error);
+            alert("An error occurred while preparing for deployment. Please ensure cookies and site data are enabled for this page.");
+        }
     }
-}
 
     function downloadCodeAsHTML() {
         const blob = new Blob([codeEditor.value], { type: 'text/html' });

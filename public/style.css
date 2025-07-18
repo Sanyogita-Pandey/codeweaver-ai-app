@@ -1,3 +1,6 @@
+/* ================================================= */
+/* ===== GLOBAL STYLES & VARIABLES             ===== */
+/* ================================================= */
 :root {
     --bg-dark: #1a1a2e;
     --bg-medium: #16213e;
@@ -7,7 +10,6 @@
     --text-primary: #dcdcdc;
     --text-secondary: #a4a4a4;
     --border-color: #2c3e50;
-
     --font-primary: 'Poppins', sans-serif;
     --font-code: 'Roboto Mono', monospace;
 }
@@ -22,7 +24,7 @@ body {
     font-family: var(--font-primary);
     background-color: var(--bg-dark);
     color: var(--text-primary);
-    overflow: hidden; /* Prevent body scroll */
+    overflow: hidden;
 }
 
 .hidden {
@@ -44,7 +46,9 @@ button:hover {
     background-color: #d83a56;
 }
 
-/* ===== Login Page Styles ===== */
+/* ================================================= */
+/* ===== LOGIN PAGE STYLES                     ===== */
+/* ================================================= */
 #login-page {
     display: flex;
     justify-content: center;
@@ -109,7 +113,6 @@ button:hover {
     height: 1px;
     background-color: var(--border-color);
 }
-
 .divider::before { left: 0; }
 .divider::after { right: 0; }
 
@@ -126,7 +129,9 @@ button:hover {
     margin-right: 8px;
 }
 
-/* ===== Main Workspace Styles ===== */
+/* ================================================= */
+/* ===== MAIN APP WORKSPACE STYLES             ===== */
+/* ================================================= */
 #app-workspace {
     display: flex;
     height: 100vh;
@@ -135,7 +140,7 @@ button:hover {
     padding: 5px;
 }
 
-/* Pane Headers */
+/* --- General Pane Styles --- */
 .pane-header {
     background-color: var(--bg-medium);
     padding: 10px 15px;
@@ -145,290 +150,12 @@ button:hover {
     align-items: center;
     flex-shrink: 0;
 }
-
 .pane-header h3 {
     font-weight: 500;
     color: var(--text-secondary);
 }
 .pane-header h3 i {
     color: var(--accent-secondary);
-}
-
-.fullscreen-btn {
-    background: none;
-    color: var(--text-secondary);
-    padding: 5px;
-}
-.fullscreen-btn:hover {
-    color: var(--text-primary);
-    background: none;
-}
-
-
-/* Chat Container */
-#chat-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background-color: var(--bg-medium);
-    border-radius: 8px;
-    overflow: hidden;
-    transition: all 0.4s ease-in-out;
-}
-
-#chat-messages {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-/* Custom Scrollbar for Chat */
-#chat-messages::-webkit-scrollbar {
-    width: 8px;
-}
-#chat-messages::-webkit-scrollbar-track {
-    background: var(--bg-medium);
-}
-#chat-messages::-webkit-scrollbar-thumb {
-    background: var(--bg-light);
-    border-radius: 4px;
-}
-#chat-messages::-webkit-scrollbar-thumb:hover {
-    background: #1a4a8a;
-}
-
-.message {
-    display: flex;
-    align-items: flex-start;
-    gap: 15px;
-    max-width: 90%;
-}
-.message .icon {
-    font-size: 1.5rem;
-    padding-top: 5px;
-}
-.message .text {
-    background-color: var(--bg-light);
-    padding: 15px;
-    border-radius: 10px;
-    line-height: 1.6;
-}
-
-.user-message {
-    align-self: flex-end;
-    flex-direction: row-reverse;
-}
-.user-message .icon {
-    color: var(--accent-primary);
-}
-.user-message .text {
-    background-color: var(--accent-primary);
-    color: white;
-    border-top-right-radius: 0;
-}
-
-.ai-message {
-    align-self: flex-start;
-}
-.ai-message .icon {
-    color: var(--accent-secondary);
-}
-.ai-message .text {
-    border-top-left-radius: 0;
-}
-
-.typing-indicator {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.typing-indicator span {
-    width: 8px;
-    height: 8px;
-    background-color: var(--accent-secondary);
-    border-radius: 50%;
-    animation: bounce 1.4s infinite ease-in-out both;
-}
-.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-
-@keyframes bounce {
-  0%, 80%, 100% { transform: scale(0); }
-  40% { transform: scale(1.0); }
-}
-
-
-#chat-input-area {
-    display: flex;
-    padding: 15px;
-    gap: 10px;
-    border-top: 2px solid var(--border-color);
-    position: relative;
-}
-
-#chat-input {
-    flex-grow: 1;
-    padding: 12px 15px;
-    border-radius: 25px;
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-dark);
-    color: var(--text-primary);
-    font-size: 1rem;
-}
-
-#send-btn, #magic-wand-btn {
-    border-radius: 50%;
-    width: 45px;
-    height: 45px;
-    font-size: 1.2rem;
-    flex-shrink: 0;
-}
-#magic-wand-btn {
-    background-color: var(--accent-secondary);
-}
-#magic-wand-btn:hover {
-    background-color: #4999a6;
-}
-
-#suggestions {
-    position: absolute;
-    bottom: 75px;
-    left: 15px;
-    background: var(--bg-light);
-    border-radius: 8px;
-    padding: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    z-index: 10;
-}
-.suggestion-item {
-    padding: 8px 12px;
-    background: var(--bg-medium);
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.suggestion-item:hover {
-    background: var(--accent-secondary);
-    color: var(--bg-dark);
-}
-
-
-/* Editor & Preview Container */
-#editor-container {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-    background-color: var(--bg-medium);
-    border-radius: 8px;
-    overflow: hidden;
-    transition: all 0.4s ease-in-out;
-}
-
-.editor-content {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    gap: 10px;
-}
-
-.code-area, .preview-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background-color: var(--bg-dark);
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.code-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 15px;
-    background-color: #2c3e50;
-    flex-shrink: 0;
-}
-.code-header span {
-    font-weight: 500;
-    color: var(--text-secondary);
-}
-.code-actions {
-    display: flex;
-    gap: 10px;
-}
-.code-actions button {
-    background: none;
-    padding: 5px 10px;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-}
-.code-actions button:hover {
-    background-color: var(--bg-light);
-    color: var(--text-primary);
-}
-.code-actions i {
-    margin-right: 5px;
-}
-
-#copy-btn.copied {
-    color: #2ecc71;
-}
-
-#code-editor {
-    flex-grow: 1;
-    width: 100%;
-    background-color: transparent;
-    border: none;
-    color: var(--text-primary);
-    font-family: var(--font-code);
-    font-size: 0.95rem;
-    line-height: 1.6;
-    padding: 15px;
-    resize: none;
-    outline: none;
-}
-#code-editor::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-#code-editor::-webkit-scrollbar-track {
-    background: var(--bg-dark);
-}
-#code-editor::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: 4px;
-}
-
-
-#live-preview {
-    width: 100%;
-    height: 100%;
-    border: none;
-    background-color: #ffffff;
-}
-
-/* Fullscreen Logic */
-#app-workspace.chat-fullscreen #editor-container,
-#app-workspace.editor-fullscreen #chat-container {
-    flex: 0;
-    width: 0;
-    padding: 0;
-    opacity: 0;
-}
-.pane-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.pane-header .header-actions {
-    display: flex;
-    gap: 8px;
 }
 .pane-header button {
     background: none;
@@ -441,206 +168,107 @@ button:hover {
 .pane-header button:hover {
     color: #fff;
 }
-
-/* --- Split View Functionality --- */
-.editor-content {
+.pane-header .header-actions {
     display: flex;
-    flex-direction: column; /* Default: stacked view */
-    height: 100%;
-    overflow: hidden;
+    gap: 8px;
 }
-.code-area, .preview-area {
+
+
+/* --- Chat Container --- */
+#chat-container {
     flex: 1;
-    min-height: 0; /* Prevents flexbox overflow */
     display: flex;
     flex-direction: column;
-}
-.preview-area {
-    border-top: 2px solid #2d3748;
-}
-
-/* --- The Active Split-View State --- */
-.editor-content.split-view-active {
-    flex-direction: row; /* Side-by-side view */
-}
-.editor-content.split-view-active .preview-area {
-    border-top: none;
-    border-left: 2px solid #2d3748;
-}
-
-/* --- Styling for the new Deploy button --- */
-#deploy-btn {
-    background-color: #38a169; /* Green */
-    color: white;
-}
-#deploy-btn:hover {
-    background-color: #2f855a;
-}
-#deploy-btn i {
-    margin-right: 5px;
-}
-#deploy-netlify-btn {
-    background-color: #00c7b7; /* Netlify's brand color */
-    color: white;
-}
-#deploy-netlify-btn:hover {
-    background-color: #00a294;
-}
-#deploy-codepen-btn {
-    background-color: #343a40;
-    color: white;
-}
-#deploy-codepen-btn:hover {
-    background-color: #23272b;
-}
-
-/* Modal Overlay (the dark background) */
-#netlify-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
-
-#netlify-modal-overlay:not(.hidden) {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-/* Modal Content Box */
-#netlify-modal {
-    background: #2d3748;
-    color: #e2e8f0;
-    padding: 25px;
+    background-color: var(--bg-medium);
     border-radius: 8px;
-    width: 90%;
-    max-width: 500px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    overflow: hidden;
+    transition: all 0.4s ease-in-out;
 }
-
-#netlify-modal h3 {
-    margin-top: 0;
-    color: white;
-    border-bottom: 1px solid #4a5568;
-    padding-bottom: 10px;
-}
-
-#netlify-modal p {
-    font-size: 15px;
-    line-height: 1.6;
-}
-
-.modal-link {
-    display: inline-block;
-    margin-bottom: 15px;
-    color: #4299e1;
-    text-decoration: none;
-    font-size: 14px;
-}
-.modal-link:hover {
-    text-decoration: underline;
-}
-.modal-link i {
-    margin-left: 4px;
-}
-
-#netlify-token-input {
-    width: 100%;
-    padding: 10px;
-    background: #1a202c;
-    border: 1px solid #4a5568;
-    border-radius: 4px;
-    color: white;
-    font-size: 16px;
-    margin-bottom: 20px;
-}
-
-.modal-actions {
+#chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 20px;
     display: flex;
-    justify-content: flex-end;
-    gap: 10px;
+    flex-direction: column;
+    gap: 20px;
 }
+#chat-messages::-webkit-scrollbar { width: 8px; }
+#chat-messages::-webkit-scrollbar-track { background: var(--bg-medium); }
+#chat-messages::-webkit-scrollbar-thumb { background: var(--bg-light); border-radius: 4px; }
+#chat-messages::-webkit-scrollbar-thumb:hover { background: #1a4a8a; }
 
-.modal-actions button {
-    padding: 10px 20px;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    font-weight: 500;
-}
-
-#modal-cancel-btn {
-    background-color: #4a5568;
-    color: white;
-}
-#modal-save-deploy-btn {
-    background-color: #00c7b7;
-    color: #1a202c;
-    font-weight: bold;
-}
-
-
-/* ================================================= */
-/* ===== MOBILE RESPONSIVE STYLES (768px below) ===== */
-/* ================================================= */
-@media (max-width: 768px) {
-    
-    /* --- 1. Main Layout: Stack panes vertically --- */
-    #app-workspace {
-        flex-direction: column;
-        height: 100vh; /* Ensure it takes full screen height */
-        padding-bottom: 60px; /* Make space for the fixed bottom nav */
-    }
-
-    #chat-container,
-    #editor-container {
-        width: 100%;
-        height: 100%; /* Each pane takes full height when active */
-        border: none;
-    }
-
-    /* --- 2. View Switching Logic: Show one pane at a time --- */
-    #app-workspace.view-chat #editor-container {
-        display: none;
-    }
-    #app-workspace.view-editor #chat-container {
-        display: none;
-    }
-    #deploy-btn {
-    background-color: #00c7b7; /* Netlify's brand color is great for deploy */
-    color: white;
-    font-weight: bold;
-}
-
-#deploy-btn:hover {
-    background-color: #00a294;
-}
-.deploy-success-message {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #2f855a;
-    color: white;
-    padding: 15px 25px;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    z-index: 3000;
+.message {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 15px;
+    max-width: 90%;
 }
-/* === STYLES FOR DEPLOY.HTML === */
+.message .icon { font-size: 1.5rem; padding-top: 5px; }
+.message .text { background-color: var(--bg-light); padding: 15px; border-radius: 10px; line-height: 1.6; }
+.user-message { align-self: flex-end; flex-direction: row-reverse; }
+.user-message .icon { color: var(--accent-primary); }
+.user-message .text { background-color: var(--accent-primary); color: white; border-top-right-radius: 0; }
+.ai-message { align-self: flex-start; }
+.ai-message .icon { color: var(--accent-secondary); }
+.ai-message .text { border-top-left-radius: 0; }
 
+.typing-indicator { display: flex; align-items: center; gap: 5px; }
+.typing-indicator span { width: 8px; height: 8px; background-color: var(--accent-secondary); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
+.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1.0); }
+}
+
+#chat-input-area { display: flex; padding: 15px; gap: 10px; border-top: 2px solid var(--border-color); position: relative; }
+#chat-input { flex-grow: 1; padding: 12px 15px; border-radius: 25px; border: 1px solid var(--border-color); background-color: var(--bg-dark); color: var(--text-primary); font-size: 1rem; }
+#send-btn, #magic-wand-btn { border-radius: 50%; width: 45px; height: 45px; font-size: 1.2rem; flex-shrink: 0; }
+#magic-wand-btn { background-color: var(--accent-secondary); }
+#magic-wand-btn:hover { background-color: #4999a6; }
+#suggestions { position: absolute; bottom: 75px; left: 15px; background: var(--bg-light); border-radius: 8px; padding: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 5px; z-index: 10; }
+.suggestion-item { padding: 8px 12px; background: var(--bg-medium); border-radius: 5px; cursor: pointer; transition: background-color 0.2s; }
+.suggestion-item:hover { background: var(--accent-secondary); color: var(--bg-dark); }
+
+
+/* --- Editor & Preview Container --- */
+#editor-container {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-medium);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.4s ease-in-out;
+}
+.editor-content { flex-grow: 1; display: flex; flex-direction: column; padding: 10px; gap: 10px; height: 100%; overflow: hidden; }
+.code-area, .preview-area { flex: 1; display: flex; flex-direction: column; background-color: var(--bg-dark); border-radius: 5px; overflow: hidden; min-height: 0; }
+.preview-area { border-top: 2px solid #2d3748; }
+
+.code-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; background-color: #2c3e50; flex-shrink: 0; }
+.code-header span { font-weight: 500; color: var(--text-secondary); }
+.code-actions { display: flex; gap: 10px; }
+.code-actions button { background: none; padding: 5px 10px; font-size: 0.9rem; color: var(--text-secondary); }
+.code-actions button:hover { background-color: var(--bg-light); color: var(--text-primary); }
+.code-actions i { margin-right: 5px; }
+#deploy-btn { background-color: #38a169; color: white; } /* Green for deploy */
+#deploy-btn:hover { background-color: #2f855a; }
+
+#code-editor { flex-grow: 1; width: 100%; background-color: transparent; border: none; color: var(--text-primary); font-family: var(--font-code); font-size: 0.95rem; line-height: 1.6; padding: 15px; resize: none; outline: none; }
+#code-editor::-webkit-scrollbar { width: 8px; height: 8px; }
+#code-editor::-webkit-scrollbar-track { background: var(--bg-dark); }
+#code-editor::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+#live-preview { width: 100%; height: 100%; border: none; background-color: #ffffff; }
+
+/* --- Fullscreen & Split View Logic --- */
+#app-workspace.chat-fullscreen #editor-container,
+#app-workspace.editor-fullscreen #chat-container { flex: 0; width: 0; padding: 0; opacity: 0; }
+.editor-content.split-view-active { flex-direction: row; }
+.editor-content.split-view-active .preview-area { border-top: none; border-left: 2px solid #2d3748; }
+
+/* ================================================= */
+/* ===== DEPLOY PAGE STYLES (`deploy.html`)    ===== */
+/* ================================================= */
 .deploy-page-container {
     display: flex;
     flex-direction: column;
@@ -649,84 +277,53 @@ button:hover {
     min-height: 100vh;
     padding: 2rem;
     text-align: center;
-    background-color: #1a1a2e; /* Match main app background */
-    color: #e0e0e0; /* Match main app text color */
-    font-family: 'Poppins', sans-serif; /* Match main app font */
+    background-color: #1a1a2e;
+    color: #e0e0e0;
+    font-family: 'Poppins', sans-serif;
 }
+.deploy-page-container h1 { font-size: 2.5rem; margin-bottom: 2rem; color: #f0f0f0; }
+#deployment-status { background-color: #162447; border-radius: 12px; padding: 2rem 3rem; min-width: 300px; max-width: 600px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); }
+.loading-state .fa-spinner { font-size: 3rem; color: #1f4287; margin-bottom: 1rem; }
+.loading-state p { font-size: 1.1rem; line-height: 1.6; }
 
-.deploy-page-container h1 {
-    font-size: 2.5rem;
-    margin-bottom: 2rem;
-    color: #f0f0f0;
-}
+#success-state h2, #error-state h2 { margin-bottom: 1rem; font-size: 1.8rem; }
+#success-state h2 { color: #2ecc71; }
+#error-state h2 { color: #e74c3c; }
+#deploy-link { display: inline-block; margin-top: 1rem; padding: 12px 20px; background-color: #07a081; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; word-break: break-all; transition: background-color 0.3s ease; }
+#deploy-link:hover { background-color: #056e59; }
+.back-button { margin-top: 3rem; color: #a0a0c0; text-decoration: none; font-size: 1rem; transition: color 0.3s ease; }
+.back-button:hover { color: #ffffff; }
 
-#deployment-status {
-    background-color: #162447; /* Slightly different background */
-    border-radius: 12px;
-    padding: 2rem 3rem;
-    min-width: 300px;
-    max-width: 600px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-}
+/* --- RESPONSIVE FIX FOR DEPLOY PAGE --- */
+#success-state, #error-state { display: none; }
+.deploy-page-container #success-state:not(.hidden),
+.deploy-page-container #error-state:not(.hidden) { display: block !important; }
+.deploy-page-container .loading-state:not(.hidden) { display: block !important; }
 
-.loading-state .fa-spinner {
-    font-size: 3rem;
-    color: #1f4287;
-    margin-bottom: 1rem;
-}
+/* ================================================= */
+/* ===== MOBILE RESPONSIVE (768px and below)   ===== */
+/* ================================================= */
+@media (max-width: 768px) {
+    #app-workspace {
+        flex-direction: column;
+        height: 100vh;
+        padding-bottom: 60px; /* Make space for the fixed bottom nav */
+    }
+    #chat-container, #editor-container {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
 
-.loading-state p {
-    font-size: 1.1rem;
-    line-height: 1.6;
-}
+    /* --- View Switching Logic --- */
+    #app-workspace.view-chat #editor-container,
+    #app-workspace.view-editor #chat-container {
+        display: none;
+    }
 
-#success-state h2, #error-state h2 {
-    margin-bottom: 1rem;
-    font-size: 1.8rem;
-}
-
-#success-state h2 {
-    color: #2ecc71; /* Green for success */
-}
-
-#error-state h2 {
-    color: #e74c3c; /* Red for error */
-}
-
-#deploy-link {
-    display: inline-block;
-    margin-top: 1rem;
-    padding: 12px 20px;
-    background-color: #07a081;
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: bold;
-    word-break: break-all;
-    transition: background-color 0.3s ease;
-}
-
-#deploy-link:hover {
-    background-color: #056e59;
-}
-
-.back-button {
-    margin-top: 3rem;
-    color: #a0a0c0;
-    text-decoration: none;
-    font-size: 1rem;
-    transition: color 0.3s ease;
-}
-
-.back-button:hover {
-    color: #ffffff;
-}
-.deploy-success-message a { color: #9ae6b4; text-decoration: none; font-weight: bold; }
-.deploy-success-message a:hover { text-decoration: underline; }
-.deploy-success-message button { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
-    /* --- 3. Mobile Navigation Bar --- */
+    /* --- Mobile Navigation Bar --- */
     #mobile-view-switcher {
-        display: flex; /* Show the nav on mobile */
+        display: flex;
         position: fixed;
         bottom: 0;
         left: 0;
@@ -737,7 +334,7 @@ button:hover {
         z-index: 1000;
     }
     #mobile-view-switcher button {
-        flex: 1; /* Each button takes 50% width */
+        flex: 1;
         background: none;
         border: none;
         color: #a0aec0;
@@ -749,33 +346,13 @@ button:hover {
         gap: 4px;
         cursor: pointer;
     }
-    #mobile-view-switcher button i {
-        font-size: 20px;
-    }
-    #mobile-view-switcher button.active {
-        color: #4299e1; /* Blue for active state */
-        background-color: #2d3748;
-    }
+    #mobile-view-switcher button i { font-size: 20px; }
+    #mobile-view-switcher button.active { color: #4299e1; background-color: #2d3748; }
 
-    /* --- 4. Tweak UI Elements for Mobile --- */
-    /* Hide desktop-only buttons */
-    #toggle-split-view-btn,
-    .fullscreen-btn {
-        display: none;
-    }
-    /* Force editor to be stacked vertically */
-    .editor-content {
-        flex-direction: column !important; /* Use !important to override JS-added class */
-    }
-    .editor-content .preview-area {
-        border-left: none !important;
-        border-top: 2px solid #2d3748 !important;
-    }
-    /* Ensure chat input is usable */
-    #chat-input-area {
-        padding: 8px;
-    }
-    .pane-header h3 {
-        font-size: 16px;
-    }
+    /* --- UI Tweaks for Mobile --- */
+    #toggle-split-view-btn, .fullscreen-btn { display: none; }
+    .editor-content { flex-direction: column !important; }
+    .editor-content .preview-area { border-left: none !important; border-top: 2px solid #2d3748 !important; }
+    #chat-input-area { padding: 8px; }
+    .pane-header h3 { font-size: 16px; }
 }
