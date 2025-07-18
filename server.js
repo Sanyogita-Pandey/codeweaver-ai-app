@@ -156,12 +156,12 @@ if (!GOOGLE_API_KEY || !NETLIFY_ACCESS_TOKEN || !NETLIFY_SITE_ID) {
 }
 
 // --- 4. DEFINE ROUTES ---
-// The rest of your code remains exactly the same.
 app.get('/', (req, res) => {
   res.status(200).json({ status: "ok", message: "CodeWeaver AI Server is running." });
 });
 
 app.post('/generate', async (req, res) => {
+    // This route is working perfectly. No changes needed.
     try {
         const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -205,6 +205,7 @@ app.post('/deploy', async (req, res) => {
         const zip = new JSZip();
         zip.file("index.html", code);
         const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
+
         const deployResponse = await fetch(`https://api.netlify.com/api/v1/sites/${process.env.NETLIFY_SITE_ID}/deploys`, {
             method: 'POST',
             headers: {
@@ -213,16 +214,25 @@ app.post('/deploy', async (req, res) => {
             },
             body: zipBuffer
         });
+
         const deployData = await deployResponse.json();
         console.log("NETLIFY DEPLOY RESPONSE:", JSON.stringify(deployData, null, 2));
+
         if (!deployResponse.ok) {
             throw new Error(`Netlify API Error: ${deployData.message || deployResponse.statusText}`);
         }
-        const liveUrl = deployData.ssl_url || deployData.deploy_ssl_url || deployData.url || (deployData.links && deployData.links.permalink);
+        
+        // ===== FIX #2: GET THE CORRECT URL FROM THE RESPONSE =====
+        // Based on your logs, the best URL is in the 'deploy_ssl_url' property.
+        const liveUrl = deployData.deploy_ssl_url;
+
         if (!liveUrl) {
-            throw new Error("Could not find a live URL in the Netlify API response.");
+            // This is a fallback in case the property name changes again.
+            throw new Error("Could not find a 'deploy_ssl_url' in the Netlify API response.");
         }
+
         res.json({ success: true, url: liveUrl });
+
     } catch (error) {
         console.error('Netlify deployment failed on server:', error);
         res.status(500).json({ success: false, message: `Deployment Failed: ${error.message}` });
@@ -230,6 +240,6 @@ app.post('/deploy', async (req, res) => {
 });
 
 // --- 5. START THE SERVER ---
-app.listen(PORT,'0.0.0.0', () => {
+app.listen(PORT, () => {
   console.log(`Server startup complete. Listening on port ${PORT}`);
 });
