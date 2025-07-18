@@ -639,6 +639,88 @@ button:hover {
     align-items: center;
     gap: 15px;
 }
+/* === STYLES FOR DEPLOY.HTML === */
+
+.deploy-page-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+    text-align: center;
+    background-color: #1a1a2e; /* Match main app background */
+    color: #e0e0e0; /* Match main app text color */
+    font-family: 'Poppins', sans-serif; /* Match main app font */
+}
+
+.deploy-page-container h1 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: #f0f0f0;
+}
+
+#deployment-status {
+    background-color: #162447; /* Slightly different background */
+    border-radius: 12px;
+    padding: 2rem 3rem;
+    min-width: 300px;
+    max-width: 600px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.loading-state .fa-spinner {
+    font-size: 3rem;
+    color: #1f4287;
+    margin-bottom: 1rem;
+}
+
+.loading-state p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+#success-state h2, #error-state h2 {
+    margin-bottom: 1rem;
+    font-size: 1.8rem;
+}
+
+#success-state h2 {
+    color: #2ecc71; /* Green for success */
+}
+
+#error-state h2 {
+    color: #e74c3c; /* Red for error */
+}
+
+#deploy-link {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 12px 20px;
+    background-color: #07a081;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    word-break: break-all;
+    transition: background-color 0.3s ease;
+}
+
+#deploy-link:hover {
+    background-color: #056e59;
+}
+
+.back-button {
+    margin-top: 3rem;
+    color: #a0a0c0;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+.back-button:hover {
+    color: #ffffff;
+}
 .deploy-success-message a { color: #9ae6b4; text-decoration: none; font-weight: bold; }
 .deploy-success-message a:hover { text-decoration: underline; }
 .deploy-success-message button { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }

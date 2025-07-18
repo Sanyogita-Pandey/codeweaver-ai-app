@@ -9,7 +9,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Roboto+Mono&display=swap" rel="stylesheet">
-     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- JSZip is not needed on this page anymore, but it's okay to leave it -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
 
@@ -69,7 +70,7 @@
         <div id="editor-container">
             <div class="pane-header">
                 <h3><i class="fa-solid fa-code"></i> Code & <i class="fa-solid fa-eye"></i> Live Preview</h3>
-                <div class="header-actions"> <!-- Wrapper for all buttons -->
+                <div class="header-actions">
                     <button id="toggle-split-view-btn" title="Toggle Split View">
                         <i class="fa-solid fa-columns"></i>
                     </button>
@@ -83,15 +84,14 @@
                     <div class="code-header">
                         <span>HTML & CSS</span>
                         <div class="code-actions">
-                            <!-- NEW DEPLOY BUTTON -->
-                              <button id="deploy-btn" title="Deploy to a live, shareable link">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Deploy
-                </button>
+                            <button id="deploy-btn" title="Deploy to a live, shareable link">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Deploy
+                            </button>
                             <button id="download-btn" title="Download as HTML file"><i class="fa-solid fa-download"></i> Download</button>
                             <button id="copy-btn" title="Copy Code"><i class="fa-solid fa-copy"></i> Copy</button>
                         </div>
                     </div>
-                    <textarea id="code-editor" spellcheck="false"></textarea> <!-- Removed readonly -->
+                    <textarea id="code-editor" spellcheck="false"></textarea>
                 </div>
                 <div class="preview-area">
                      <iframe id="live-preview" title="Live Website Preview"></iframe>
@@ -99,23 +99,10 @@
             </div>
         </div>
     </main>
+    
+    <!-- ===== The old Netlify Modal has been REMOVED as it's no longer needed ===== -->
 
-     <div id="netlify-modal-overlay" class="hidden">
-        <div id="netlify-modal">
-            <h3>Deploy to Netlify</h3>
-            <p>To deploy your site, please provide your Netlify Personal Access Token. This is stored securely in your browser and never sent to our servers.</p>
-            <a href="https://app.netlify.com/user/applications#personal-access-tokens" target="_blank" class="modal-link">
-                Click here to create a new token <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            </a>
-            <input type="password" id="netlify-token-input" placeholder="Paste your Netlify Token here">
-            <div class="modal-actions">
-                <button id="modal-cancel-btn">Cancel</button>
-                <button id="modal-save-deploy-btn">Save & Deploy</button>
-            </div>
-        </div>
-    </div>
-
-
+    <!-- Mobile View Switcher -->
     <div id="mobile-view-switcher">
         <button id="show-chat-btn" class="active">
             <i class="fa-solid fa-comments"></i>
@@ -127,7 +114,7 @@
         </button>
     </div>
 
-
+    <!-- Main script for this page -->
     <script src="script.js"></script>
 </body>
 </html>

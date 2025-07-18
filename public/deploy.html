@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deploying Your Website - CodeWeaver AI</title>
+    <link rel="stylesheet" href="style.css"> <!-- Reuses your existing stylesheet -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="deploy-page-container">
+        <h1>Deployment in Progress</h1>
+        
+        <!-- Status will be updated by JavaScript -->
+        <div id="deployment-status">
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Contacting deployment server... please wait.</p>
+                <p>This can take up to a minute.</p>
+            </div>
+
+            <div id="success-state" class="hidden">
+                <h2>✅ Success!</h2>
+                <p>Your website is now live. Click the link below to view it:</p>
+                <a href="#" id="deploy-link" target="_blank"></a>
+            </div>
+
+            <div id="error-state" class="hidden">
+                <h2>❌ Deployment Failed</h2>
+                <p id="error-message"></p>
+            </div>
+        </div>
+
+        <a href="index.html" class="back-button">
+            <i class="fas fa-arrow-left"></i> Go Back to Editor
+        </a>
+    </div>
+
+    <!-- Link to the new JavaScript file for this page -->
+    <script src="deploy.js"></script>
+</body>
+</html>

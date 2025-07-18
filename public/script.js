@@ -215,54 +215,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function deployViaBackend() {
-        const code = codeEditor.value;
-        if (!code || code.trim() === createHtmlBoilerplate('').trim()) {
-            alert("There is no code to deploy. Please generate a website first.");
-            return;
-        }
+   // REPLACE your old deployViaBackend function with this new one in script.js
 
-        const originalButtonText = deployBtn.innerHTML;
-        deployBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deploying...';
-        deployBtn.disabled = true;
-
-        try {
-            const response = await fetch(DEPLOY_SERVER_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code: code })
-            });
-
-            const data = await response.json();
-
-            if (!response.ok || !data.success) {
-                throw new Error(data.message || 'An unknown error occurred during deployment.');
-            }
-            
-            deployBtn.innerHTML = '<i class="fa-solid fa-check"></i> Deployed!';
-            
-            const successMessage = document.createElement('div');
-            successMessage.className = 'deploy-success-message';
-            successMessage.innerHTML = `
-                <p>✅ Success! Your site is live:</p>
-                <a href="${data.url}" target="_blank">${data.url}</a>
-                <button onclick="this.parentElement.remove()">×</button>
-            `;
-            document.body.appendChild(successMessage);
-            
-            navigator.clipboard.writeText(data.url).catch(err => console.error('Failed to copy link:', err));
-            
-        } catch (error) {
-            console.error('Deployment failed:', error);
-            alert(`❌ Deployment Failed: ${error.message}`);
-            deployBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Failed';
-        } finally {
-            setTimeout(() => {
-                deployBtn.innerHTML = originalButtonText;
-                deployBtn.disabled = false;
-            }, 5000);
-        }
+async function deployViaBackend() {
+    const code = codeEditor.value;
+    // Check if there is actual code to deploy, ignoring the boilerplate
+    if (!code || code.trim() === createHtmlBoilerplate('').trim()) {
+        alert("There is no code to deploy. Please generate a website first.");
+        return;
     }
+
+    try {
+        // Save the code to the browser's session storage
+        sessionStorage.setItem('codeToDeploy', code);
+        
+        // Redirect the user to the new deployment page
+        window.location.href = 'deploy.html';
+        
+    } catch (error) {
+        // This might happen if storage is disabled in the browser
+        console.error("Failed to save code for deployment:", error);
+        alert("An error occurred while preparing for deployment. Please ensure cookies and site data are enabled for this page.");
+    }
+}
 
     function downloadCodeAsHTML() {
         const blob = new Blob([codeEditor.value], { type: 'text/html' });
