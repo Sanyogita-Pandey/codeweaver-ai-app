@@ -6,11 +6,10 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const JSZip = require('jszip');
 const fetch = require('node-fetch');
 
-// --- 1. INITIALIZE APP ---
+// ... (All the code at the top is the same) ...
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// --- 2. CONFIGURE CORS ---
 const allowedOrigins = [
   'https://codeweaver-ai-app-12.onrender.com', 
   'http://localhost:5500',
@@ -26,19 +25,15 @@ const corsOptions = {
     }
   }
 };
-app.use(cors(corsOptions));
+
+
+app.use(cors(cors(corsOptions)));
 app.use(express.json({ limit: '2mb' }));
-
-
-// --- 3. SECURELY LOAD KEYS ---
 const GOOGLE_API_KEY = "AIzaSyDJwMLwjA-vGdE6tVYiFZwFvTarswZug8M"; 
 const NETLIFY_ACCESS_TOKEN = "nfp_jZpHMxPpnB2zMDvDBVVzEvahDU23DGH94156";
 const NETLIFY_SITE_ID = "9e955514-5324-4327-be59-195e63afce1c";
 
-if (!GOOGLE_API_KEY || !NETLIFY_ACCESS_TOKEN || !NETLIFY_SITE_ID) {
-  console.error("FATAL ERROR: A required environment variable is missing!");
-  process.exit(1); 
-}
+//... etc.
 
 // --- 4. DEFINE ROUTES ---
 app.get('/', (req, res) => {
@@ -46,50 +41,40 @@ app.get('/', (req, res) => {
 });
 
 app.post('/generate', async (req, res) => {
-  try {
-    const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    
-    const { prompt } = req.body;
-    if (!prompt) {
-      return res.status(400).json({ error: 'Prompt is required.' });
+    // This route is working, no changes needed here.
+    try {
+        const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const { prompt } = req.body;
+        const fullPrompt = `You are an expert web developer AI. Your task is to generate a JSON object based on a user's request.
+      
+      RULES:
+      1.  You MUST respond with a single, valid JSON object and nothing else. Do not wrap it in markdown like \`\`\`json.
+      2.  The JSON object MUST have exactly two keys: "message" (a friendly, conversational string) and "code" (a string containing HTML, CSS, and JS).
+      3.  The 'code' string must NOT contain <html>, <head>, or <body> tags.
+      4.  **CRITICAL FOR VALID JSON:** If any string value (in 'message' or 'code') needs to contain a double-quote character ("), you MUST escape it with a backslash (e.g., \\"). If any string value needs a backslash (\\), you MUST escape it with another backslash (e.g., \\\\). This is non-negotiable.
+
+      User Request: "${prompt}"
+      `; // Your prompt logic
+        const result = await model.generateContent(fullPrompt);
+        const response = await result.response;
+        let aiResponseText = response.text();
+        const startIndex = aiResponseText.indexOf('{');
+        const endIndex = aiResponseText.lastIndexOf('}');
+        if (startIndex === -1 || endIndex === -1 || endIndex < startIndex) {
+            throw new Error("AI response did not contain a valid JSON object.");
+        }
+        const jsonString = aiResponseText.substring(startIndex, endIndex + 1);
+        const parsedResponse = JSON.parse(jsonString);
+        res.json(parsedResponse);
+    } catch (error) {
+        // ... error handling
+        console.error("Error in /generate:", error.message);
+        res.status(500).json({ message: `Server failed: ${error.message}` });
     }
-    
-    const fullPrompt = `You are CodeWeaver AI, an expert web developer specializing in self-contained HTML, CSS, and JavaScript components. You MUST respond with a valid JSON object, and nothing else. Do not use markdown like \`\`\`json. The JSON object must have exactly two keys: "message" (a friendly, conversational text response) and "code" (a single string containing the component's HTML, including any <style> or <script> tags). Do NOT include <html>, <head>, or <body> tags. User Request: "${prompt}"`;
-    
-    const result = await model.generateContent(fullPrompt);
-    const response = await result.response;
-    let aiResponseText = response.text();
-
-    const startIndex = aiResponseText.indexOf('{');
-    const endIndex = aiResponseText.lastIndexOf('}');
-
-    if (startIndex === -1 || endIndex === -1 || endIndex < startIndex) {
-        throw new Error("AI response did not contain a valid JSON object.");
-    }
-
-    const jsonString = aiResponseText.substring(startIndex, endIndex + 1);
-    
-    // ===== THE FINAL FIX IS HERE: Sanitize the string for bad backslashes =====
-    // This replaces every single backslash with a double backslash, making it JSON-safe.
-    const sanitizedJsonString = jsonString.replace(/\\/g, '\\\\');
-    
-    const parsedResponse = JSON.parse(sanitizedJsonString); // This parses the safe, sanitized string
-    res.json(parsedResponse);
-
-  } catch (error) {
-    console.error("======================================");
-    console.error("DETAILED ERROR in /generate route:");
-    console.error("Error Message:", error.message);
-    console.error("Full Error Object:", error);
-    console.error("======================================");
-    res.status(500).json({ 
-        message: `Server failed: ${error.message}`,
-        code: `<!-- Server Error: ${error.message} -->` 
-    });
-  }
 });
 
+// ===== THE FIX IS IN THIS ROUTE =====
 app.post('/deploy', async (req, res) => {
     try {
         const { code } = req.body;
@@ -99,6 +84,7 @@ app.post('/deploy', async (req, res) => {
         const zip = new JSZip();
         zip.file("index.html", code);
         const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
+
         const deployResponse = await fetch(`https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/deploys`, {
             method: 'POST',
             headers: {
@@ -107,17 +93,34 @@ app.post('/deploy', async (req, res) => {
             },
             body: zipBuffer
         });
+
         const deployData = await deployResponse.json();
+
+        // ** STEP 1: ADD CRITICAL LOGGING **
+        // This will print the exact response from Netlify to your Render logs.
+        console.log("NETLIFY DEPLOY RESPONSE:", JSON.stringify(deployData, null, 2));
+
         if (!deployResponse.ok) {
             throw new Error(`Netlify API Error: ${deployData.message || deployResponse.statusText}`);
         }
-        const liveUrl = deployData.ssl_url || deployData.url;
+        
+        // ** STEP 2: MAKE THE URL FINDER MORE ROBUST **
+        // We will check for multiple possible properties where the URL might be.
+        const liveUrl = deployData.ssl_url || deployData.deploy_ssl_url || deployData.url || (deployData.links && deployData.links.permalink);
+
+        if (!liveUrl) {
+            // If we still can't find a URL, we know the structure is different.
+            throw new Error("Could not find a live URL in the Netlify API response.");
+        }
+
         res.json({ success: true, url: liveUrl });
+
     } catch (error) {
         console.error('Netlify deployment failed on server:', error);
         res.status(500).json({ success: false, message: `Deployment Failed: ${error.message}` });
     }
 });
+
 
 // --- 5. START THE SERVER ---
 app.listen(PORT, () => {
