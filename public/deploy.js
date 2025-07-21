@@ -22,6 +22,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
+
+
+            const requestBody = JSON.stringify({ code: codeToDeploy });
+            console.log("--- DEPLOY.JS: SENDING TO SERVER ---");
+            console.log("Request Body:", requestBody);
+
+
             const response = await fetch(DEPLOY_SERVER_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
