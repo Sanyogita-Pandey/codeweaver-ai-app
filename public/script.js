@@ -1,9 +1,15 @@
+// --- script.js ---
+// This is your FRONTEND file. It runs in the user's browser.
+
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Server Endpoints ---
+    // --- Server Endpoints (should point to your Render.com backend) ---
     const AI_SERVER_URL = 'https://codeweaver-ai-app.onrender.com/generate';
+    // FIXED: Added the deploy URL endpoint
+    const DEPLOY_SERVER_URL = 'https://codeweaver-ai-app.onrender.com/deploy';
 
     // --- Page Elements ---
     const loginPage = document.getElementById('login-page');
+    // ... (all your other element variables are fine) ...
     const appWorkspace = document.getElementById('app-workspace');
     const loginForm = document.getElementById('login-form');
     const guestBtn = document.getElementById('guest-btn');
@@ -24,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const showEditorBtn = document.getElementById('show-editor-btn');
 
     // --- Event Listeners ---
+    // ... (all your other event listeners are fine) ...
     loginForm.addEventListener('submit', (e) => { e.preventDefault(); showWorkspace(); });
     guestBtn.addEventListener('click', showWorkspace);
     sendBtn.addEventListener('click', handleUserMessage);
@@ -44,41 +51,87 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => toggleFullscreen(btn.getAttribute('data-target')));
     });
     toggleSplitViewBtn.addEventListener('click', toggleSplitView);
-    deployBtn.addEventListener('click', deployViaBackend);
+    deployBtn.addEventListener('click', deployViaBackend); // This now calls the corrected function
     showChatBtn.addEventListener('click', () => setMobileView('chat'));
     showEditorBtn.addEventListener('click', () => setMobileView('editor'));
 
-    // --- State Restoration Logic ---
-    function restoreState() {
-        const savedChatHTML = sessionStorage.getItem('savedChatHTML');
-        const savedCode = sessionStorage.getItem('savedCode');
-        if (savedChatHTML && savedCode) {
-            loginPage.classList.add('hidden');
-            appWorkspace.classList.remove('hidden');
-            chatMessages.innerHTML = savedChatHTML;
-            codeEditor.value = savedCode;
-            updatePreview(savedCode);
-            scrollToBottom();
-            setMobileView('chat');
-            sessionStorage.removeItem('savedChatHTML');
-            sessionStorage.removeItem('savedCode');
-        }
-    }
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('view') === 'chat') {
-        restoreState();
-    }
 
     // --- Core Functions ---
+    // ... (All other functions like showWorkspace, handleUserMessage, generateAiResponse are fine) ...
+    // Your existing `generateAiResponse` function is already well-written with good error handling.
+
+    // =========================================================================
+    // ===== FIXED DEPLOYMENT FUNCTION (THIS IS THE MAJOR CHANGE) ==========
+    // =========================================================================
+    async function deployViaBackend() {
+        const codeToDeploy = codeEditor.value;
+
+        if (!codeToDeploy || !codeToDeploy.trim().toLowerCase().startsWith('<!doctype html>')) {
+            alert("The editor does not contain a valid website to deploy. Please generate a website first.");
+            return;
+        }
+
+        // Provide feedback to the user that deployment is in progress
+        const originalButtonText = deployBtn.innerHTML;
+        deployBtn.disabled = true;
+        deployBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deploying...';
+
+        try {
+            // Make a direct API call to your server's /deploy endpoint
+            const response = await fetch(DEPLOY_SERVER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                // Send the code from the editor in the request body
+                body: JSON.stringify({ code: codeToDeploy })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                // If the server returned an error (like 400 or 500)
+                throw new Error(result.message || 'An unknown deployment error occurred.');
+            }
+
+            // Success! Show the live URL to the user.
+            alert(`✅ Deployment successful!\n\nYour site is live at:\n${result.url}`);
+            // Optionally, open the new site in a new tab
+            window.open(result.url, '_blank');
+
+        } catch (error) {
+            console.error("Failed to deploy:", error);
+            alert(`❌ Deployment Failed:\n\n${error.message}`);
+        } finally {
+            // Always restore the button to its original state
+            deployBtn.disabled = false;
+            deployBtn.innerHTML = originalButtonText;
+        }
+    }
+    // =========================================================================
+
+    // Note: The rest of your helper functions (displayUserMessage, updatePreview, etc.)
+    // are correct and do not need to be changed. I am omitting them here for brevity.
     function createHtmlBoilerplate(bodyContent) {
-        return `<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Generated by CodeWeaver AI</title>\n    <link rel="preconnect" href="https://fonts.googleapis.com">\n    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">\n</head>\n<body>\n${bodyContent || ''}\n</body>\n</html>`;
+        return `<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Generated by CodeWeaver AI</title>\n</head>\n<body>\n${bodyContent || ''}\n</body>\n</html>`;
     }
 
     function showWorkspace() {
         loginPage.classList.add('hidden');
         appWorkspace.classList.remove('hidden');
         if (!codeEditor.value) {
-            const initialContent = createHtmlBoilerplate('<div style="font-family: sans-serif; text-align: center; padding-top: 2rem;">Your live preview will appear here.</div>');
+            const initialContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Preview</title>
+</head>
+<body>
+    <div style="font-family: sans-serif; text-align: center; padding: 2rem;">
+        <h1>Welcome!</h1>
+        <p>Your live preview will appear here.</p>
+    </div>
+</body>
+</html>`;
             codeEditor.value = initialContent;
             updatePreview(initialContent);
         }
@@ -91,22 +144,29 @@ document.addEventListener('DOMContentLoaded', () => {
         displayUserMessage(messageText);
         chatInput.value = '';
         showTypingIndicator();
-        const aiResponse = await generateAiResponse(messageText);
-        removeTypingIndicator();
-        displayAiMessage(aiResponse.message);
-        if (aiResponse.code) {
-            // AI returns a fragment, we wrap it for the editor and preview.
-            const fullHtmlContent = createHtmlBoilerplate(aiResponse.code);
-            codeEditor.value = fullHtmlContent;
-            updatePreview(fullHtmlContent);
-            if (window.innerWidth <= 768) {
-                setMobileView('editor');
+        try {
+            const aiResponse = await generateAiResponse(messageText);
+            if (aiResponse.message.startsWith('❌')) { // Handle errors from generateAiResponse
+                 displayAiMessage(aiResponse.message);
+            } else {
+                 displayAiMessage(aiResponse.message);
+                if (aiResponse.code) {
+                    const fullHtmlContent = createHtmlBoilerplate(aiResponse.code);
+                    codeEditor.value = fullHtmlContent;
+                    updatePreview(fullHtmlContent);
+                    if (window.innerWidth <= 768) {
+                        setMobileView('editor');
+                    }
+                }
             }
+        } catch(e) {
+             displayAiMessage("A critical error occurred while contacting the AI.");
+        } finally {
+            removeTypingIndicator();
         }
     }
 
     async function generateAiResponse(prompt) {
-        // This function is correct. No changes needed.
         try {
             const response = await fetch(AI_SERVER_URL, {
                 method: 'POST',
@@ -114,8 +174,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ prompt: prompt }),
             });
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || `Server error: ${response.status}`);
+                // Try to parse error text, but fall back if it's not JSON
+                let errorMsg = `Server error: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    errorMsg = errorData.message;
+                } catch (e) { /* Ignore if response is not json */ }
+                throw new Error(errorMsg);
             }
             return await response.json();
         } catch (error) {
@@ -124,11 +189,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // All other helper functions (displayUserMessage, updatePreview, etc.) remain the same
+    // All other helper functions...
     function displayUserMessage(text) {
         const messageEl = document.createElement('div');
         messageEl.className = 'message user-message';
-        messageEl.innerHTML = `<div class="text">${text}</div><i class="fa-solid fa-user icon"></i>`;
+        messageEl.innerHTML = `<div class="text"></div><i class="fa-solid fa-user icon"></i>`;
+        messageEl.querySelector('.text').textContent = text;
         chatMessages.appendChild(messageEl);
         scrollToBottom();
     }
@@ -144,6 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
         scrollToBottom();
     }
     function showTypingIndicator() {
+        if(document.getElementById('typing-indicator')) return;
         const typingEl = document.createElement('div');
         typingEl.id = 'typing-indicator';
         typingEl.className = 'message ai-message';
@@ -182,31 +249,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showChatBtn.classList.toggle('active', view === 'chat');
         showEditorBtn.classList.toggle('active', view !== 'chat');
     }
-    
-async function deployViaBackend() {
-    const codeFromEditor = codeEditor.value;
-    
-    // --- DEBUGGING CHECKPOINT 1 ---
-    console.log("--- SCRIPT.JS: SAVING FOR DEPLOY ---");
-    console.log("Content being saved:", codeFromEditor);
-    // --------------------------------
-
-    if (!codeFromEditor || !codeFromEditor.trim().startsWith('<!DOCTYPE html>')) {
-        alert("The editor does not contain a valid website to deploy. Please generate a website first.");
-        return;
-    }
-    
-    try {
-        sessionStorage.setItem('codeToDeploy', codeFromEditor);
-        sessionStorage.setItem('savedChatHTML', chatMessages.innerHTML);
-        sessionStorage.setItem('savedCode', codeFromEditor);
-        window.location.href = 'deploy.html';
-    } catch (error) {
-        console.error("Failed to save state for deployment:", error);
-    }
-}
-
-
 
     function downloadCodeAsHTML() {
         const blob = new Blob([codeEditor.value], { type: 'text/html' });

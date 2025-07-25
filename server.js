@@ -4,7 +4,10 @@
 // const NETLIFY_ACCESS_TOKEN = "nfp_jZpHMxPpnB2zMDvDBVVzEvahDU23DGH94156";
 // const NETLIFY_SITE_ID = "9e955514-5324-4327-be59-195e63afce1c";
 
-require('dotenv').config();
+// --- server.js ---
+// This is your BACKEND file. It runs in Node.js on a server (like Render).
+
+require('dotenv').config(); // Loads variables from a .env file into process.env
 const express = require('express');
 const cors = require('cors');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
@@ -13,39 +16,50 @@ const fetch = require('node-fetch');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
-app.use(cors()); 
-app.use(express.json({ limit: '2mb' }));
 
-const GOOGLE_API_KEY = "AIzaSyDJwMLwjA-vGdE6tVYiFZwFvTarswZug8M"; 
-const NETLIFY_ACCESS_TOKEN = "nfp_jZpHMxPpnB2zMDvDBVVzEvahDU23DGH94156";
-const NETLIFY_SITE_ID = "9e955514-5324-4327-be59-195e63afce1c";
+// --- Middleware ---
+app.use(cors()); // Allows your front-end to talk to this server
+app.use(express.json({ limit: '2mb' })); // Allows server to read JSON from requests
 
+// --- Environment Variables (THE CORRECT WAY) ---
+// Create a file named .env in the same directory and put your keys there:
+// GOOGLE_API_KEY=AIzaSy...
+// NETLIFY_ACCESS_TOKEN=nfp_...
+// NETLIFY_SITE_ID=9e95...
+const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+const NETLIFY_ACCESS_TOKEN = process.env.NETLIFY_ACCESS_TOKEN;
+const NETLIFY_SITE_ID = process.env.NETLIFY_SITE_ID;
 
 if (!GOOGLE_API_KEY || !NETLIFY_ACCESS_TOKEN || !NETLIFY_SITE_ID) {
-  console.error("FATAL ERROR: A required environment variable is missing!");
+  console.error("FATAL ERROR: A required environment variable is missing! Check your .env file or Render environment settings.");
   process.exit(1); 
 }
 
-app.get('/', (req, res) => res.status(200).json({ status: "ok" }));
+// --- Routes ---
+app.get('/', (req, res) => res.status(200).json({ status: "Server is running" }));
 
 app.post('/generate', async (req, res) => {
-    // This route is correct. No changes needed.
     try {
         const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         const { prompt } = req.body;
-        const fullPrompt = `You are a senior front-end developer and UI/UX designer. 
-         Your Task: Generate a valid JSON object.
-         The JSON must have two keys: "message" (a friendly reply) and "code" (a string of self-contained HTML/CSS/JS).
-         The 'code' string must NOT contain <html> or <body> tags. CRITICAL: All strings must be valid JSON, escaping all quotes (\\") and backslashes (\\\\).
-         User's Request: "${prompt}"`;
+        if (!prompt) {
+            return res.status(400).json({ message: "Prompt is required." });
+        }
+        const fullPrompt = `You are a senior front-end developer and UI/UX designer. Your Task: Generate a valid JSON object. The JSON must have two keys: "message" (a friendly reply to the user) and "code" (a string containing a self-contained HTML body fragment with CSS and JS). The 'code' value must NOT contain <html>, <head>, or <body> tags. CRITICAL: Your entire output must be a single, valid JSON object, properly escaping all special characters for JSON format (e.g., use \\" for quotes inside strings, \\n for newlines). User's Request: "${prompt}"`;
         const result = await model.generateContent(fullPrompt);
         const response = await result.response;
+        
         let aiResponseText = response.text();
+        
+        // A more robust way to clean and parse the AI's response
         const startIndex = aiResponseText.indexOf('{');
         const endIndex = aiResponseText.lastIndexOf('}');
-        if (startIndex === -1 || endIndex === -1) throw new Error("AI response did not contain valid JSON.");
+        if (startIndex === -1 || endIndex === -1) {
+            throw new Error("AI response did not contain a recognizable JSON object.");
+        }
         const jsonString = aiResponseText.substring(startIndex, endIndex + 1);
+        
         res.json(JSON.parse(jsonString));
     } catch (error) {
         console.error("ERROR in /generate:", error);
@@ -53,70 +67,57 @@ app.post('/generate', async (req, res) => {
     }
 });
 
-// ===== THE FINAL, BULLETPROOF DEPLOYMENT ROUTE =====
+// ===== FIXED AND CORRECTED DEPLOYMENT ROUTE =====
+// --- server.js ---
+
+// ===== THE CORRECTED AND FINAL DEPLOYMENT ROUTE =====
+// --- server.js ---
+
+// ===== VERIFY THIS CODE BLOCK IS IN YOUR server.js FILE =====
 app.post('/deploy', async (req, res) => {
     try {
+        console.log("--- SERVER.JS: RECEIVED DEPLOY REQUEST ---");
 
-       console.log("--- SERVER.JS: RECEIVED REQUEST ---");
-        console.log("Full Request Body:", req.body);
-        console.log("Received code property:", req.body.code);
-        // 1. Get whatever code the front-end sends. We don't trust its format.
-       if (code === undefined) {
-            return res.status(400).json({ success: false, message: 'Server received no code property.' });
+        // THIS IS THE CRITICAL FIX: Get the 'code' variable from the request body.
+        const code = req.body.code;
+
+        // Now we can safely check if 'code' exists.
+        if (!code) {
+            return res.status(400).json({ success: false, message: 'Server did not receive any code to deploy.' });
         }
 
-        // 2. THE GUARANTEED FIX: Create a new, perfect HTML document and inject the received code.
-        //    This happens every single time, ensuring a renderable file is always deployed.
-         if (!String(code).trim().toLowerCase().startsWith('<!doctype html>')) {
-            console.log("Server is wrapping the code in boilerplate...");
-            const bodyContent = code;
-            code =  `<!DOCTYPE html>
-                  <html lang="en">
-                    <head>
+        // The rest of the function now correctly uses the 'code' variable.
+        const fullHtmlContent = String(code).trim().toLowerCase().startsWith('<!doctype html>') 
+            ? code
+            : `<!DOCTYPE html>
+                <html lang="en">
+                <head>
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <title>Generated by CodeWeaver AI</title>
-                    <link rel="preconnect" href="https://fonts.googleapis.com">
-                    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-                    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-                    <style>
-                        body { font-family: 'Poppins', sans-serif; }
-                    </style>
                 </head>
                 <body>
-                ${receivedCode}
+                    ${code}
                 </body>
-                </html>`; // The full boilerplate from before
-                        }
-
+                </html>`;
         
-        // --------------------------------------------------------------------------------
-
-        // 3. Zip the guaranteed, full HTML file.
         const zip = new JSZip();
-        zip.file("index.html", code);
+        zip.file("index.html", fullHtmlContent);
         const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
 
-        // 4. Perform the two-step deploy to Netlify.
-        const draftResponse = await fetch(`https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/deploys`, {
+        const deployResponse = await fetch(`https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/deploys`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/zip', 'Authorization': `Bearer ${NETLIFY_ACCESS_TOKEN}` },
             body: zipBuffer
         });
-        const draftData = await draftResponse.json();
-        if (!draftResponse.ok) throw new Error(`Netlify Draft Failed: ${draftData.message}`);
-        
-        const deployId = draftData.id;
-        if (!deployId) throw new Error("Could not get a deploy ID from Netlify.");
-        
-        await fetch(`https://api.netlify.com/api/v1/deploys/${deployId}/restore`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${NETLIFY_ACCESS_TOKEN}` }
-        });
 
-        // 5. Return the main, permanent site URL.
-        const liveUrl = draftData.ssl_url; 
-        res.json({ success: true, url: liveUrl });
+        const deployData = await deployResponse.json();
+        if (!deployResponse.ok) {
+            throw new Error(`Netlify deploy failed: ${deployData.message || 'Unknown error'}`);
+        }
+
+        console.log("Deployment successful, URL:", deployData.ssl_url);
+        res.json({ success: true, url: deployData.ssl_url });
 
     } catch (error) {
         console.error('Deployment process failed:', error);
@@ -124,4 +125,5 @@ app.post('/deploy', async (req, res) => {
     }
 });
 
+// --- Start Server ---
 app.listen(PORT, () => console.log(`Server startup complete. Listening on port ${PORT}`));
